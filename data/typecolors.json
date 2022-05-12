@@ -1,0 +1,20 @@
+{
+    "bug" : ["#A8B820", 7, {"en" : "bug", "ko" : "벌레"}],
+    "dark" : ["#705848", 17, {"en" : "dark", "ko" : "악"}],
+    "dragon" : ["#7038F8", 16, {"en" : "dragon", "ko" : "드래곤"}],
+    "electric" : ["#F8D030",13, {"en" : "electric", "ko" : "전기"}],
+    "fairy" : ["#EE99AC", 18, {"en" : "fairy", "ko" : "페어리"}],
+    "fighting" : ["#C03028", 2, {"en" : "fighting", "ko" : "격투"}],
+    "fire" : ["#F08030", 10, {"en" : "fire", "ko" : "불꽃"}],
+    "flying" : ["#A890F0", 3, {"en" : "flying", "ko" : "비행"}],
+    "ghost" : ["#A890F0", 8, {"en" : "ghost", "ko" : "고스트"}],
+    "grass" : ["#78C850", 12, {"en" : "grass", "ko" : "풀"}],
+    "ground" : ["#E0C068",5, {"en" : "ground", "ko" : "땅"}],
+    "ice" : ["#98D8D8", 15, {"en" : "ice", "ko" : "얼음"}],
+    "normal" : ["#A8A878", 1, {"en" : "normal", "ko" : "노말"}],
+    "poison" : ["#A040A0", 4, {"en" : "poison", "ko" : "독"}],
+    "psychic" : ["#F85888", 14, {"en" : "psychic", "ko" : "에스퍼"}],
+    "rock" : ["#9E863D",6, {"en" : "rock", "ko" : "바위"}],
+    "steel" : ["#B8B8D0", 9, {"en" : "steel", "ko" : "강철"}],
+    "water" : ["#6890F0", 11, {"en" : "water", "ko" : "물"}]
+}
