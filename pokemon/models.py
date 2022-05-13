@@ -14,6 +14,18 @@ class Ability(models.Model):
     description = models.TextField()
     locale = models.ForeignKey(Locale, on_delete= models.CASCADE)    
 
+
+    
+
+class PokeType(models.Model):
+    type_index = models.IntegerField()
+    name = models.CharField(max_length = 10)
+    color = models.CharField(max_length= 7)
+    locale = models.ForeignKey(Locale, on_delete= models.CASCADE)
+    
+    def __str__(self):
+        return self.name
+        
 class Move(models.Model):
     move_index = models.IntegerField()
     name = models.CharField(max_length= 40)
@@ -27,17 +39,8 @@ class Move(models.Model):
     max_hits = models.IntegerField(default = 1)
     damage_cls = models.CharField(max_length= 20)
     flavor_text = models.TextField()
+    type = models.ForeignKey(PokeType, on_delete= models.CASCADE)
 
-    def __str__(self):
-        return self.name
-    
-
-class PokeType(models.Model):
-    type_index = models.IntegerField()
-    name = models.CharField(max_length = 10)
-    color = models.CharField(max_length= 7)
-    locale = models.ForeignKey(Locale, on_delete= models.CASCADE)
-    
     def __str__(self):
         return self.name
 

@@ -65,6 +65,7 @@ vis part는 router로 구성함
                     <div v-else-if="task === 'retrieve'">
                         <IdentifyItem
                         :item="detail"
+                        :locale="locale"
                         />
                     </div>
                     <div v-else-if="task === 'filter'">

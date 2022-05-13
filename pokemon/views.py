@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from .serailizers import PokeTypeSerializer, PokemonRetrieveSerializer, PokemonSerializer
+from .serializers import PokeTypeSerializer, PokemonRetrieveSerializer, PokemonSerializer
 from .models import * 
 from rest_framework import viewsets # vieset import
 

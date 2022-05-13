@@ -2,19 +2,25 @@ import * as d3 from "d3";
 
 class RadarChart {
     margin = {
-        top: 10, right: 100, bottom: 40, left: 40
+        top: 100, right: 100, bottom: 100, left: 100
     }
 
-    ticks = [60, 80, 100, 120, 140, 160, 180];
+    ticks = [20, 40, 60, 80, 100, 120, 140, 160, 180];
 
-    radialScale = d3.scaleLinear()
+    // radialScale = d3.scaleLinear()
+    //    .domain([20,180])
+    //    .range([0,200])
+
+    radialScale = d3.scalePow()
+    .exponent(0.3)
         .domain([20,180])
-        .range([0,250])
-    // radialScale = d3.scalePow()
-    //     .exponent(0.6)
-    //     .domain([0,180])
-    //     .range([0,250])
+        .range([0,200])
+
         
+    line = d3.lineRadial()
+            .angle((d) => (Math.PI /3) * d.key)
+            .radius((d) => this.radialScale(d.value))
+            .curve(d3.curveCardinalClosed)
 
     constructor(svg, features, width = 600, height = 600) {
         this.svg = svg;
@@ -24,16 +30,13 @@ class RadarChart {
         this.handlers = {}; // eventlisteners
     }
 
+
+    
     initialize() {
         this.svg = d3.select(this.svg);
         this.container = this.svg.append("g");
-        this.xAxis = this.svg.append("g");
-        this.yAxis = this.svg.append("g");
-        this.legend = this.svg.append("g");
-
-        this.xScale = d3.scaleLinear();
-        this.yScale = d3.scaleLinear();
-        this.zScale = d3.scaleOrdinal().range(d3.schemeCategory10)
+        this.axisAnnotate = this.svg.append("g")
+        this.points = this.svg.append("g")
 
         this.svg
             .attr("width", this.width + this.margin.left + this.margin.right)
@@ -41,164 +44,139 @@ class RadarChart {
 
         this.container
             .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-
-        this.line = d3.line()
-            .x(d => d.x)
-            .y(d => d.y);
+        this.axisAnnotate
+            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
+        this.points
+            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
         
 
-        // ticks는 고정임 
-        // container에다가 추가해야 함 
-        this.ticks.forEach(t =>
-            this.container.append("circle")
-            .attr("cx", 300)
-            .attr("cy", 300)
-            .attr("fill", "none")
+        this.container.selectAll("circle")
+            .data(this.ticks)
+            .join("circle")
+            .attr("cx", this.width / 2)
+            .attr("cy", this.height / 2)
+            .attr("fill", "gray")
+            .attr("fill-opacity", 0.1)
             .attr("stroke", "gray")
-            .attr("r", this.radialScale(t))
-        );
+            .attr("r", (d) => (this.radialScale(d)))
 
-        this.ticks.forEach(t =>
-            this.container.append("text")
-            .attr("x", 305)
-            .attr("y", 300 - this.radialScale(t))
-            .text(t.toString())
-        );
+        this.container.selectAll("text")
+            .data(this.ticks)
+            .join('text')
+            .attr("x", this.width / 2 + 5)
+            .attr("y", (d) => (this.height / 2 - this.radialScale(d)))
+            .text((d) => (d.toString()))
 
-        for (let i = 0; i < this.features.length; i++) {
-            let ft_name = this.features[i];
-            let angle = (Math.PI / 2) + (2 * Math.PI * i / this.features.length);
-            // let line_coordinate = this.angleToCoordinate(angle, 10);
-            let label_coordinate = this.angleToCoordinate(angle, 200);
-    
-            //draw axis line
-            // this.svg.append("line")
-            //     .attr("x1", 300)
-            //     .attr("y1", 300)
-            //     .attr("x2", line_coordinate.x)
-            //     .attr("y2", line_coordinate.y)
-            //     .attr("stroke","black");
-    
-            //draw axis label
-            this.container.append("text")
-                .attr("x", label_coordinate.x)
-                .attr("y", label_coordinate.y)
-                .text(ft_name);
+        this.axisAnnotate.selectAll("text")
+            .data(this.features)
+            .join('text')
+            .attr("x", (d) => this.angleToX(d[1], 220))
+            .attr("y", (d) => this.angleToY(d[1], 220))
+            .attr("text-anchor", "middle")
+            .text((d) => (d[0]));
+
+
+    }
+
+    angleToX(angle, value){
+        let x = Math.cos((Math.PI / 2) + (2 * Math.PI * angle / this.features.length)) * this.radialScale(value)
+        return this.width / 2 + x;
+    }
+
+    angleToY(angle, value){
+        let y =  Math.sin((Math.PI / 2) + (2 * Math.PI * angle / this.features.length)) * this.radialScale(value)
+        return this.height / 2 - y ;
+    }
+
+
+    parseStat(item){
+        return [
+            {
+                key : 0, // for angle(radial axis)
+                value : item.hp,
+                class : 0
+            },
+            {
+                key : 1,
+                value : item.attack,
+                class : 0
+            },
+            {
+                key : 2,
+                value : item.defense,
+                class : 0
+            },
+            {
+                key : 3,
+                value : item.spattack,
+                class : 0
+            },
+            {
+                key : 4,
+                value : item.spdefense,
+                class : 0
+            },            {
+                key : 5,
+                value : item.speed,
+                class : 0
+            }
+        ]
+    }
+
+
+
+    update(item, task){
+
+        if (task === "filter"){
+            item = item.forEach((i) => this.parseStat(i))
+            this.container.selectAll("path")
+                .data(item)
+                .join("path")
+                .transition()
+                .attr("transform", `translate(${this.width/2}, ${this.height/2})`)
+                .attr("stroke", "#213946")
+                .attr("stroke-width", 1)
+                .attr('z-index', 200)
+                .attr("d", this.line)
+                .style("fill-opacity", 0.35)
+            this.points.selectAll("circle")
+                .data(item)
+                .join("circle")
+                .transition()
+                .attr("transform", `translate(${this.width/2}, ${this.height/2})`)
+                .attr("stroke", "#213946")
+                .attr("stroke-width", 1)
+                .attr('z-index', 200)
+                .attr("d", 3)
+                .style("fill-opacity", 0.35)
+
+        } else {
+            item = [this.parseStat(item)]
+            this.container.selectAll("path")
+                .data(item)
+                .join("path")
+                .transition()
+                .attr("transform", `translate(${this.width/2}, ${this.height/2})`)
+                .attr("stroke", "#213946")
+                .attr("stroke-width", 1)
+                .attr('z-index', 200)
+                .attr("d", this.line)
+                .style("fill-opacity", 0.35)
+                
+
+            this.points.selectAll("circle")
+                .data(item[0])
+                .join("circle")
+                .transition()
+                .attr("cx", (d) => (this.width - this.angleToX(d.key, d.value )))
+                .attr("cy", (d) => (this.angleToY(d.key, d.value )))
+                .attr("fill", "dark")
+                .attr("fill-opacity", 1)
+                .attr("stroke", "gray")
+                .attr('z-index', 200)
+                .attr("r", 3)
+
         }
-
-        
-
-        
-
-    }
-
-    angleToCoordinate(angle, value){
-        let x = Math.cos(angle) * this.radialScale(value);
-        let y = Math.sin(angle) * this.radialScale(value);
-        return {"x": 300 + x, "y": 300 - y};
-    }
-
-    getPathCoordinates(data_point){
-        let coordinates = [];
-        for (var i = 0; i < this.features.length; i++){
-            let ft_name = this.features[i];
-            let angle = (Math.PI / 2) + (2 * Math.PI * i / this.features.length);
-            coordinates.push(this.angleToCoordinate(angle, data_point[ft_name]));
-        }
-        return coordinates;
-    }
-
-    // https://observablehq.com/@d3/d3-lineradial
-    polygon(sides) {
-        var length = sides,
-          s = 1,
-          phase = 0;
-        const radial = d3
-            .lineRadial()
-            .curve(d3.curveLinearClosed)
-            .angle((_, i) => (i / length) * 2 * Math.PI + phase)
-            .radius(() => s)
-
-          ;
-        const poly = function() {
-          return radial(Array.from({ length }));
-        };
-        poly.context = function(_) {
-          return arguments.length ? (radial.context(_), poly) : radial.context();
-        };
-        poly.n = function(_) {
-          return arguments.length ? ((length = +_), poly) : length;
-        };
-        poly.rotate = function(_) {
-          return arguments.length ? ((phase = +_), poly) : phase;
-        };
-        poly.scale = function(_) {
-            console.log(arguments)
-          return arguments.length ? ((s = +_), poly) : s;
-        };
-        poly.curve = function(_) {
-          return arguments.length ? (radial.curve(_), poly) : radial.curve();
-        };
-        poly.radius = radial.radius;
-        poly.angle = radial.angle;
-        return poly;
-      }
-
-
-    update(items){
-        console.log('cls', items)
-        console.log(items, Array.isArray(items))
-
-        // let colors = ["darkorange", "gray", "navy"];
-
-        // for (let i in items){
-        //     let d = items[i];
-        //     let color = colors[i];
-        //     let coordinates = this.getPathCoordinates(d);
-
-        //     console.log('draw')
-
-        //     console.log(coordinates)
-
-        //     //draw the path element
-        //     console.log(this.line)
-        //     this.container.append("path")
-        //         .datum(coordinates)
-        //         .attr("d",this.line)
-        //         .attr("stroke-width", 3)
-        //         .attr("stroke", color)
-        //         .attr("fill", color)
-        //         .attr("stroke-opacity", 1)
-        //         .attr("opacity", 0.5);
-        // }
-
-
-        // let angleSlice = Math.PI * 2 / 180
-
-        
-        let polygon = new this.polygon()
-        .curve(d3.curveCardinalClosed)
-        .scale(150)
-        .n(3)()
-
-        console.log(polygon)
-
-    
-
-
-
-
-
-
-        this.container.append("path")
-            .attr("transform", `translate(300,300)`) 
-            .attr("d", polygon)
-            .attr("stroke-width", 3)
-            .attr("stroke", 'darkorange')
-            .attr("fill", 'darkorange')
-            .attr("stroke-opacity", 1)
-            .attr("opacity", 0.5);
-        
 
         // 영역 안의 background를 만들고
         // 마우스 올라가면 내부를 채우도록 함

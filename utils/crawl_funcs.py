@@ -106,7 +106,7 @@ def crawlTypes():
 
         fwd_rel, inv_rel= parseDmgRelations(dmg_relations)
 
-        types[type_names['en'].lower()] = {
+        types[i] = {
                 'locale' : type_names,
                 'fwd_rel' : fwd_rel,
                 'inv_rel' : inv_rel
@@ -220,8 +220,9 @@ def parseDmgRelations(dmg_relations):
         
         ratio, relation = relation_dict[relation]
         for t in types:
-            dmg_forward[relation][ratio].append(t['name'])
-            dmg_inversed[relation][t['name']] = ratio
+            type_index = getID(t['url'])
+            dmg_forward[relation][ratio].append(type_index)
+            dmg_inversed[relation][type_index] = ratio
 
     return dmg_forward, dmg_inversed
 
