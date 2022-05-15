@@ -1,26 +1,16 @@
 import * as d3 from "d3";
 
 class RadarChart {
+    // reference
+    // baseline : https://yangdanny97.github.io/blog/2019/03/01/D3-Spider-Chart
+    // tooltip / eventlistener : http://bl.ocks.org/nbremer/21746a9668ffdf6d8242
+    // 
+
     margin = {
-        top: 100, right: 100, bottom: 100, left: 100
+        top: 50, right: 50, bottom: 50, left: 50
     }
 
-    ticks = [20, 40, 60, 80, 100, 120, 140, 160, 180];
-
-    // radialScale = d3.scaleLinear()
-    //    .domain([20,180])
-    //    .range([0,200])
-
-    radialScale = d3.scalePow()
-    .exponent(0.3)
-        .domain([20,180])
-        .range([0,200])
-
-        
-    line = d3.lineRadial()
-            .angle((d) => (Math.PI /3) * d.key)
-            .radius((d) => this.radialScale(d.value))
-            .curve(d3.curveCardinalClosed)
+    ticks = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180];
 
     constructor(svg, features, width = 600, height = 600) {
         this.svg = svg;
@@ -30,13 +20,13 @@ class RadarChart {
         this.handlers = {}; // eventlisteners
     }
 
-
-    
     initialize() {
         this.svg = d3.select(this.svg);
         this.container = this.svg.append("g");
         this.axisAnnotate = this.svg.append("g")
         this.points = this.svg.append("g")
+        this.tooltips = this.svg.append("g")
+        this.highlight = this.svg.append("g")
 
         this.svg
             .attr("width", this.width + this.margin.left + this.margin.right)
@@ -48,7 +38,21 @@ class RadarChart {
             .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
         this.points
             .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-        
+        this.tooltips
+            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
+        this.highlight
+            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
+
+            
+        this.radialScale = d3.scalePow()
+            .exponent(0.8)
+            .domain([0,180])
+            .range([0,300 * this.width / 600])
+    
+        this.line = d3.lineRadial()
+            .angle((d) => (Math.PI /3) * d.key) // key : 0~5 > angle : 0/3 pi ~ 5/3 pi
+            .radius((d) => this.radialScale(d.value)) 
+            .curve(d3.curveCardinalClosed)
 
         this.container.selectAll("circle")
             .data(this.ticks)
@@ -63,6 +67,7 @@ class RadarChart {
         this.container.selectAll("text")
             .data(this.ticks)
             .join('text')
+            .style("font-size", "10px")
             .attr("x", this.width / 2 + 5)
             .attr("y", (d) => (this.height / 2 - this.radialScale(d)))
             .text((d) => (d.toString()))
@@ -70,8 +75,9 @@ class RadarChart {
         this.axisAnnotate.selectAll("text")
             .data(this.features)
             .join('text')
-            .attr("x", (d) => this.angleToX(d[1], 220))
-            .attr("y", (d) => this.angleToY(d[1], 220))
+            .style("font-size", "13px")
+            .attr("x", (d) => this.angleToX(d[1], 2 * this.width / 3 + 20 )) // 300 > 220 2/3 + 20
+            .attr("y", (d) => this.angleToY(d[1], 2 * this.width / 3 + 20))
             .attr("text-anchor", "middle")
             .text((d) => (d[0]));
 
@@ -79,136 +85,128 @@ class RadarChart {
     }
 
     angleToX(angle, value){
-        let x = Math.cos((Math.PI / 2) + (2 * Math.PI * angle / this.features.length)) * this.radialScale(value)
+        // d3's angle starts from zenith
+        let x = Math.cos((Math.PI / 2) - (2 * Math.PI * angle / this.features.length)) * this.radialScale(value)
         return this.width / 2 + x;
     }
 
     angleToY(angle, value){
-        let y =  Math.sin((Math.PI / 2) + (2 * Math.PI * angle / this.features.length)) * this.radialScale(value)
+        let y =  Math.sin((Math.PI / 2) - (2 * Math.PI * angle / this.features.length)) * this.radialScale(value)
         return this.height / 2 - y ;
     }
-
 
     parseStat(item){
         return [
             {
                 key : 0, // for angle(radial axis)
-                value : item.hp,
-                class : 0
+                value : item.hp ? item.hp : 0,
+                name : "HP"
             },
             {
                 key : 1,
-                value : item.attack,
-                class : 0
+                value : item.attack ? item.attack : 0,
+                name : "ATK"
             },
             {
                 key : 2,
-                value : item.defense,
-                class : 0
+                value : item.defense ? item.defense : 0,
+                name : "DEF"
             },
             {
                 key : 3,
-                value : item.spattack,
-                class : 0
+                value : item.spattack ? item.spattack : 0,
+                name : "SPATK"
             },
             {
                 key : 4,
-                value : item.spdefense,
-                class : 0
+                value : item.spdefense ? item.spdefense : 0,
+                name : "SPDEF"
             },            {
                 key : 5,
-                value : item.speed,
-                class : 0
+                value : item.speed ? item.speed : 0,
+                name : "SPD"
             }
         ]
     }
 
-
-
     update(item, task){
-
+        
+        let colors = ""
         if (task === "filter"){
-            item = item.forEach((i) => this.parseStat(i))
-            this.container.selectAll("path")
-                .data(item)
-                .join("path")
-                .transition()
-                .attr("transform", `translate(${this.width/2}, ${this.height/2})`)
-                .attr("stroke", "#213946")
-                .attr("stroke-width", 1)
-                .attr('z-index', 200)
-                .attr("d", this.line)
-                .style("fill-opacity", 0.35)
-            this.points.selectAll("circle")
-                .data(item)
-                .join("circle")
-                .transition()
-                .attr("transform", `translate(${this.width/2}, ${this.height/2})`)
-                .attr("stroke", "#213946")
-                .attr("stroke-width", 1)
-                .attr('z-index', 200)
-                .attr("d", 3)
-                .style("fill-opacity", 0.35)
-
+            colors = item.map((i) => (i.types[0].color))
+            item = item.map((i) => (this.parseStat(i)))
         } else {
+            console.log(item)
+            colors = [item.types[0].color]
             item = [this.parseStat(item)]
-            this.container.selectAll("path")
-                .data(item)
-                .join("path")
-                .transition()
-                .attr("transform", `translate(${this.width/2}, ${this.height/2})`)
-                .attr("stroke", "#213946")
-                .attr("stroke-width", 1)
-                .attr('z-index', 200)
-                .attr("d", this.line)
-                .style("fill-opacity", 0.35)
-                
+        }
 
+        console.log(colors)
+        
+        // define paths
+        let paths = this.container.selectAll("path")
+            .data(item)
+            .join("path")
+        
+
+
+        // add transition 
+        paths
+            .transition()
+            .attr("transform", `translate(${this.width/2}, ${this.height/2})`)
+            .attr("stroke", "#213946")
+            .attr("stroke-width", 1)
+            .attr('z-index', 200)
+            .attr("d", this.line)
+            .attr("fill", (d, i) => (colors[i]))
+            .style("fill-opacity", 0.5)
+        
+        // add eventlistener
+        paths
+            .on('mouseover', (e, d) => {
+                e;d;
+                console.log(d)
+                console.log(e)
+                //Dim all blobs
+                d3.selectAll("path")
+                    .transition()
+                    .duration(200)
+                    .style("fill-opacity", 0.1); 
+
+                this.tooltips.selectAll("text")
+                    .data(d)
+                    .join('text')
+                    .style("font-size", "13px")
+                    .attr("x", (d) => (this.angleToX(d.key, d.value + 20))) // 300 > 220 2/3 + 20
+                    .attr("y", (d) => (this.angleToY(d.key, d.value  + 20)))
+                    .attr("text-anchor", "middle")
+                    .text((d) => (d.value));
+            })
+            .on('mouseout', (d) => {
+                d;
+                //Bring back all blobs
+                d3.selectAll("path")
+                    .transition()
+                    .duration(200)
+                    .style("fill-opacity", 0.35);
+
+                this.tooltips.selectAll("text")
+                    .remove()
+            });
+
+        if (task !== "filter"){
             this.points.selectAll("circle")
-                .data(item[0])
+                .data(item.flat())
                 .join("circle")
                 .transition()
-                .attr("cx", (d) => (this.width - this.angleToX(d.key, d.value )))
+                .attr("cx", (d) => (this.angleToX(d.key, d.value )))
                 .attr("cy", (d) => (this.angleToY(d.key, d.value )))
                 .attr("fill", "dark")
                 .attr("fill-opacity", 1)
                 .attr("stroke", "gray")
                 .attr('z-index', 200)
                 .attr("r", 3)
-
         }
-
-        // 영역 안의 background를 만들고
-        // 마우스 올라가면 내부를 채우도록 함
-        // let blobWrapper = this.container.selectAll(".radarWrapper")
-        //     .data(items)
-        //     .enter().append("g")
-        //     .attr("class", "radarWrapper");
-
-        // blobWrapper
-        //     .append("path")
-        //     .attr("class", "radarArea")
-        //     .attr("d", (d,i) => {i; return radarLine(d); })
-        //     .style("fill", (d,i) => {d; return d3.scale.category10().color(i); })
-        //     .style("fill-opacity", 0.35)
-        //     .on('mouseover', function (d,i){
-        //         d;i;
-        //         //Dim all blobs
-        //         d3.selectAll(".radarArea")
-        //             .transition().duration(200)
-        //             .style("fill-opacity", 0.1); 
-        //         //Bring back the hovered over blob
-        //         d3.select(this)
-        //             .transition().duration(200)
-        //             .style("fill-opacity", 0.7);	
-        //     })
-        //     .on('mouseout', function(){
-        //         //Bring back all blobs
-        //         d3.selectAll(".radarArea")
-        //             .transition().duration(200)
-        //             .style("fill-opacity", 0.35);
-        //     });
-
 
     }
 }

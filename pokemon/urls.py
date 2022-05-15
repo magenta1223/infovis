@@ -10,4 +10,5 @@ router.register('poketype', PokeTypeViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('counter/', CounterView.as_view(), name=  'counter')
 ]

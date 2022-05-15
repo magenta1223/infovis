@@ -11,14 +11,15 @@ class AbilitySerializer(serializers.ModelSerializer):
         model = Ability
         fields = '__all__'
 
-class MoveSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Move
-        fields = '__all__'
-
 class PokeTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PokeType
+        fields = '__all__'
+
+class MoveSerializer(serializers.ModelSerializer):
+    type = PokeTypeSerializer()
+    class Meta:
+        model = Move
         fields = '__all__'
 
 

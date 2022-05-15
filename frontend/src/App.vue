@@ -11,7 +11,7 @@ vis part는 router로 구성함
     <v-app class="container ma-0" fluid>
         <v-container>
             <v-row>
-                <v-col cols="5" class="sidebar">
+                <v-col cols="3" class="sidebar">
                     <v-row>
                         <SelectLocale
                         @locale="setLocale"
@@ -19,27 +19,49 @@ vis part는 router로 구성함
                     </v-row>
                     <v-row>
                         <v-expansion-panels>
+                            <!-- Search & Retrieve -->
                             <v-expansion-panel>
-                            
+                                <!-- Header -->
                                 <v-expansion-panel-header @click="task='retrieve'">
                                     <template v-slot:default>
                                         Retrieve
                                     </template>
                                 </v-expansion-panel-header>
+                                <!-- Content -->
                                 <v-expansion-panel-content>
-                                    <SearchBar
-                                    :task="task"
-                                    @search="searchItems"
-                                    />
+                                    <!-- search bar -->
+                                    <v-row>
+                                        <SearchBar
+                                        :task="task"
+                                        @search="searchItems"
+                                        />
+                                    </v-row>
+                                    <!-- items -->
+                                    <v-row>
+                                        <v-container >
+                                            <v-row v-for="item in tableItems" :key="item.id">
+                                                <v-col class = "title" v-ripple>
+                                                    <v-card-title class="text-start" @click="retrieve(item.id)">
+                                                        {{item.name}}
+                                                    </v-card-title>
+                                                    <v-divider></v-divider>
+                                                </v-col>
+                                            </v-row>       
+                                        </v-container>
+                                    </v-row>
                                 </v-expansion-panel-content>
                             </v-expansion-panel>
+                            <!-- Filters -->
                             <v-expansion-panel>
+                                <!-- Header -->
                                 <v-expansion-panel-header @click="task='filter'">
                                     <template v-slot>
                                         Filter
                                     </template>
                                 </v-expansion-panel-header>
+                                <!-- Content -->
                                 <v-expansion-panel-content>
+                                    <!-- filters -->
                                     <MultiFilter
                                     :task="task"
                                     :locale="locale"
@@ -49,16 +71,9 @@ vis part는 router로 구성함
                             </v-expansion-panel>
                         </v-expansion-panels>
                     </v-row>
-                    <v-row>
-                        <ListItem
-                        :items="tableItems"
-                        :locale="locale"
-                        @retrieve="retrieveItem"
-                        />
-
-                    </v-row>
                 </v-col>
-                <v-col cols="6">
+                <!-- Area2 for Visualization -->
+                <v-col>
                     <div v-if="task === ''">
                         initail vue
                     </div>
@@ -66,13 +81,17 @@ vis part는 router로 구성함
                         <IdentifyItem
                         :item="detail"
                         :locale="locale"
+                        @counter="counter"
                         />
                     </div>
                     <div v-else-if="task === 'filter'">
-                        <FilterCond/>
+                        <FilterCond
+                        :items="filteredItems"
+                        :locale="locale"
+                        />
                     </div>
                     <div v-else>
-                        <RetrieveCounter/>
+                        <RetrieveCounter :locale="locale"/>
                     </div>
 
                 </v-col>
@@ -87,7 +106,6 @@ vis part는 router로 구성함
 import MultiFilter from './components/MultiFilter.vue'
 import SearchBar from './components/SearchBar.vue'
 import SelectLocale from './components/SelectLocale.vue'
-import ListItem from './components/ListItem.vue'
 
 import IdentifyItem from './components/IdentifyItem.vue'
 import FilterCond from './components/FilterCond.vue'
@@ -104,8 +122,9 @@ export default {
             task : "",
             locale : "en",
             filteredItems : [],
-            detail : {},
-            filter : {}
+            searched : [],
+            detail : {data : {}, filteredMoves : []},
+            filter : {},
         }
     },
 
@@ -113,7 +132,6 @@ export default {
         MultiFilter,
         SearchBar,
         SelectLocale,
-        ListItem,
         IdentifyItem,
         FilterCond,
         RetrieveCounter
@@ -137,12 +155,25 @@ export default {
             }).catch((response) => {
                 console.log('Failed', response)
             })
-
         },
+
+        retrieve : function(id){
+            axios({
+                method : "GET",
+                url : url + id,
+                params : {
+                    locale : this.locale
+                }
+            }).then((response) => {
+                console.log(response.data)
+                this.detail = response.data
+                this.task = 'retrieve'
+            })
+        },
+
+
         searchItems : function(keyword){
-            console.log(keyword)
-            this.filteredItems = this.items.filter(el => el.name.includes(keyword))
-            console.log(this.task)
+            this.searched = this.items.filter(el => el.name.includes(keyword))
         },
 
         contain : function(pokemonsTypes, filterTypes) {
@@ -192,21 +223,12 @@ export default {
             this.filter = filter
         },
         
-        retrieveItem : function(item){
-            this.detail = item
-            this.task = 'retrieve'
-        },
-        
-        refetchByLocale : function(){
-            this.fetchItems()
-            console.log(this.task)
-            if (this.task === "retrieve"){
-                this.searchItems()
-            } else if (this.task === "filter"){
-                this.filterItems(this.filter)
-                console.log('여기 무자식아', this.items)
-            }
-            
+
+    
+
+        counter : function(c){
+            c;
+            this.task = 'counter'
         }
 
     },
@@ -218,17 +240,10 @@ export default {
     },
 
     watch : {
-        // locale : function() {
-        //     this.fetchItems()
-        //     this.filteredItems = []
-        // },
-
-
         locale : {
             handler(newVal, oldVal){
                 console.log(newVal, oldVal)
-                this.refetchByLocale()
-                
+                this.fetchItems()
             },
             immediate : true
         },
@@ -242,8 +257,8 @@ export default {
     computed : {
         tableItems : function() {
             console.log('computed')
-            if (this.filteredItems.length > 0){
-                return this.filteredItems
+            if (this.searched.length > 0){
+                return this.searched
             } else {
                 return this.items
             }

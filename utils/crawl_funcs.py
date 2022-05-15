@@ -80,9 +80,6 @@ def crwalPokemons():
     print('Done ! \nYou can see the results in ./data')
 
 
-
-
-
 def crawlTypes():
     """
     Crawl All Types
@@ -250,7 +247,7 @@ def parseMove(move_inform, locales):
     move_dict['accuracy'] = null_parser(move_inform['accuracy'])
     move_dict['pp'] = null_parser(move_inform['pp'])
     move_dict['priority'] = null_parser(move_inform['priority'])
-    move_dict['type'] = null_parser(move_inform['type'])
+    move_dict['type'] = null_parser(getID(move_inform['type']['url']))
 
     if move_inform['meta'] == None:
         move_dict['flinch_chance'] = 0
@@ -321,6 +318,8 @@ def movesToDB():
     Move.objects.all().delete()
     moves = pd.read_csv('./data/moves.csv')
     LOCALES = {locale : Locale.objects.all().filter(Q(language__iexact = locale))[0] for locale in ['en', 'ko']}
+    ALL_TYPES = PokeType.objects.all()    
+
     for url in tqdm(moves['url']):
         if int(url.split('/')[-2]) > 10000:
             continue
@@ -340,6 +339,7 @@ def movesToDB():
                 max_hits = move['max_hits'],
                 damage_cls = move['damage_class'],
                 flavor_text = move['flavor_text'][locale],
+                type = ALL_TYPES.filter(Q(type_index = move['type']) & Q(locale__language__iexact = locale))[0]
             )
             instance.save()
         time.sleep(SLEEP)
