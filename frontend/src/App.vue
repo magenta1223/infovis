@@ -11,89 +11,43 @@ vis part는 router로 구성함
     <v-app class="container ma-0" fluid>
         <v-container>
             <v-row>
-                <v-col cols="3" class="sidebar">
-                    <v-row>
-                        <SelectLocale
-                        @locale="setLocale"
-                        />
-                    </v-row>
-                    <v-row>
-                        <v-expansion-panels>
-                            <!-- Search & Retrieve -->
-                            <v-expansion-panel>
-                                <!-- Header -->
-                                <v-expansion-panel-header @click="task='retrieve'">
-                                    <template v-slot:default>
-                                        Retrieve
-                                    </template>
-                                </v-expansion-panel-header>
-                                <!-- Content -->
-                                <v-expansion-panel-content>
-                                    <!-- search bar -->
-                                    <v-row>
-                                        <SearchBar
-                                        :task="task"
-                                        @search="searchItems"
-                                        />
-                                    </v-row>
-                                    <!-- items -->
-                                    <v-row>
-                                        <v-container >
-                                            <v-row v-for="item in tableItems" :key="item.id">
-                                                <v-col class = "title" v-ripple>
-                                                    <v-card-title class="text-start" @click="retrieve(item.id)">
-                                                        {{item.name}}
-                                                    </v-card-title>
-                                                    <v-divider></v-divider>
-                                                </v-col>
-                                            </v-row>       
-                                        </v-container>
-                                    </v-row>
-                                </v-expansion-panel-content>
-                            </v-expansion-panel>
-                            <!-- Filters -->
-                            <v-expansion-panel>
-                                <!-- Header -->
-                                <v-expansion-panel-header @click="task='filter'">
-                                    <template v-slot>
-                                        Filter
-                                    </template>
-                                </v-expansion-panel-header>
-                                <!-- Content -->
-                                <v-expansion-panel-content>
-                                    <!-- filters -->
-                                    <MultiFilter
-                                    :task="task"
-                                    :locale="locale"
-                                    @condition="filterItems"
-                                    />
-                                </v-expansion-panel-content>
-                            </v-expansion-panel>
-                        </v-expansion-panels>
-                    </v-row>
+                <v-col cols="2">
+                    <MultiFilter
+                    :task="task"
+                    :locale="locale"
+                    @condition="filterItems"
+                    @locale="fetchItems()"
+                    />
                 </v-col>
+                <v-col cols="6">
+                    <FilterCond
+                        :items="filteredItems"
+                        :locale="locale"
+                        @retrieve="retrieve"
+                        />
+                </v-col>
+                <v-col>
+                    <IdentifyItem
+                    :item="detail"
+                    :locale="locale"
+                    />
+                </v-col>
+            </v-row>
+
+            <v-row>
                 <!-- Area2 for Visualization -->
                 <v-col>
-                    <div v-if="task === ''">
-                        initail vue
-                    </div>
-                    <div v-else-if="task === 'retrieve'">
+
+                    <!-- <div v-else-if="task === 'retrieve'">
                         <IdentifyItem
                         :item="detail"
                         :locale="locale"
                         @counter="counter"
                         />
-                    </div>
-                    <div v-else-if="task === 'filter'">
-                        <FilterCond
-                        :items="filteredItems"
-                        :locale="locale"
-                        />
-                    </div>
-                    <div v-else>
+                    </div> -->
+                    <div>
                         <RetrieveCounter :locale="locale"/>
                     </div>
-
                 </v-col>
             </v-row>
         </v-container>
@@ -104,9 +58,6 @@ vis part는 router로 구성함
 
 <script>
 import MultiFilter from './components/MultiFilter.vue'
-import SearchBar from './components/SearchBar.vue'
-import SelectLocale from './components/SelectLocale.vue'
-
 import IdentifyItem from './components/IdentifyItem.vue'
 import FilterCond from './components/FilterCond.vue'
 import RetrieveCounter from './components/RetrieveCounter.vue'
@@ -130,11 +81,9 @@ export default {
 
     components : {
         MultiFilter,
-        SearchBar,
-        SelectLocale,
-        IdentifyItem,
         FilterCond,
-        RetrieveCounter
+        RetrieveCounter,
+        IdentifyItem
     },
 
     methods : {
@@ -166,7 +115,6 @@ export default {
                 }
             }).then((response) => {
                 this.detail = response.data
-                this.task = 'retrieve'
             })
         },
 
@@ -201,25 +149,32 @@ export default {
             }
         },
 
-        filterItems : function(filter){
+        filterItems : function(condition){
+
+            let keyword = condition.keyword
+            let cond = condition.condition
             
             let filtered = []
-
-            filtered = this.items.filter(el => el.hp >= filter.hp)
-            filtered = filtered.filter(el => el.attack >= filter.attack)
-            filtered = filtered.filter(el => el.defense >= filter.defense)
-            filtered = filtered.filter(el => el.spattack >= filter.spattack)
-            filtered = filtered.filter(el => el.spdefense >= filter.spdefense)
-            filtered = filtered.filter(el => el.speed >= filter.speed)
-            filtered = filtered.filter(el => el.total >= filter.total)
-            filtered = filtered.filter(el => el.is_legendary === filter.IsLegendary)
-            filtered = filtered.filter(el => el.is_mythical === filter.IsMythical)
-            filtered = filtered.filter(el => this.contain(el.types, filter.selectedTypes))
+            if (keyword !== ""){
+                filtered = this.items.filter(el => el.name.includes(keyword))
+            } else {
+                filtered = this.items
+            }
+            filtered = filtered.filter(el => el.hp >= cond.hp)
+            filtered = filtered.filter(el => el.attack >= cond.attack)
+            filtered = filtered.filter(el => el.defense >= cond.defense)
+            filtered = filtered.filter(el => el.spattack >= cond.spattack)
+            filtered = filtered.filter(el => el.spdefense >= cond.spdefense)
+            filtered = filtered.filter(el => el.speed >= cond.speed)
+            filtered = filtered.filter(el => el.total >= cond.total)
+            filtered = filtered.filter(el => el.is_legendary === cond.IsLegendary)
+            filtered = filtered.filter(el => el.is_mythical === cond.IsMythical)
+            filtered = filtered.filter(el => this.contain(el.types, cond.selectedTypes))
             this.filteredItems = filtered
             if (this.filteredItems.length === 0){
                 alert('No Items')
             }
-            this.filter = filter
+            this.filter = cond
         },
         
 
@@ -252,14 +207,6 @@ export default {
             this.keyword = ""
         }
     },
-
-    computed : {
-        tableItems : function() {
-            return this.searched.length > 0 ? this.searched : this.items
-        }
-    }
-
-
 
 }
 </script>

@@ -1,12 +1,14 @@
 <template>
     <div style="width:100%">
-        <v-card :loading="true">
+        <v-card
+        height="900"
+        class="overflow-y-auto overflow-x-hidden">
             <!-- sprite & stats -->
             <v-row>
-                <v-col cols = "6">
+                <v-col cols = "5">
                     <v-img :src="imgSrc" max-width="400"  /> 
                 </v-col>
-                <v-col cols = "6">
+                <v-col cols = "7">
                     <svg id="radar"></svg>
                 </v-col>
             </v-row>
@@ -71,7 +73,6 @@
             </v-row>
         </v-card>
         <v-btn @click="counter()">find counter</v-btn>
-        
     </div>
 
 
@@ -98,14 +99,12 @@ export default {
                 "en" : [
                     {text : 'Name', value : 'name'},
                     {text : 'Power', value : 'power'},
-                    {text : 'PP', value : 'pp'},
                     {text : 'Description', value : 'flavor_text'},
                     {text : 'Type', value : 'type'},
                 ],
                 "ko" : [
                     {text : '이름', value : 'name'},
                     {text : '위력', value : 'power'}, 
-                    {text : 'PP', value : 'pp'}, 
                     {text : '설명', value : 'flavor_text'},
                     {text : '타입', value : 'type'}
                 ]
@@ -157,7 +156,7 @@ export default {
         console.log(this.item)
         console.log(this.features[this.locale])
         this.fetchTypes()
-        this.radarchart = new RadarChart("#radar", this.features[this.locale], 300, 300)
+        this.radarchart = new RadarChart("#radar", this.features[this.locale], 250, 250)
         this.radarchart.initialize()
         this.radarchart.update(this.item)
     },

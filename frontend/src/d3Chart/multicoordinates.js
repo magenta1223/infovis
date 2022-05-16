@@ -11,8 +11,6 @@ class MultiCoordinates {
         this.features = features; // statuses 
         this.width = width;
         this.height = height;
-
-        this.selected = ""
     }
 
     initialize(){
@@ -89,11 +87,15 @@ class MultiCoordinates {
 
     update(data) {
 
+        if (typeof(data) === undefined){
+            data = {
+                hp : 0, attack : 0, defense : 0, spattack : 0, spdefense : 0, speed :0, types : [{color : "#000000"}]
+            }
+        }
+
         let colors = data.map((d) => (d.types[0].color))
 
         console.log('updating ! ')
-
-        console.log( 'x' , this.features[2][0], this.xScale(this.features[2][0]))
 
         this.axes.selectAll("g.axis")
             .data(this.features)
@@ -123,15 +125,22 @@ class MultiCoordinates {
             .style("stroke", (d, i) => (colors[i]))
             .attr("stroke-width", 15)
             .style("opacity", 0.5)
-            .on("click", (e,d) => {
-                this.highlight(d)
-            })
+            // .on("click", (e,d) => {
+            //     this.highlight(d)
+            // })
 
                 
     }
 
     highlight(highlight){
-        highlight;
+        // 이 체인을 외부에서 걸어야 함
+        // 어떤 요소를 클릭했을 때, 반응하도록
+        // 1) filtercond에서 event listener를 등록해야 함
+        // 2) The user brushes on the scatterplot. : multicoords에서 뭔가를 선택함. 이건 plot에 적용되는게 아니고, 개별 아이템임. 그냥 lines에 등록해버리자
+        // 2.brushCirclesis called, and an eventobject is passed. 그러면 highlight가 called
+        // 3.In brushCircles, get an array of the selected items, brushedItems. 그 안에서 선택된 items를 반환하고
+        // 4.In brushCircles, call fwith brushedItems. 그 item으로 f를 call함
+        // 5.In f, call histogram.update(brushedItems, “variety”) 그리고 multicoords와 identify를 동시에 update하면 된다. 
         console.log('highlight',highlight)
         let color = highlight.types[0].color
 
@@ -150,7 +159,6 @@ class MultiCoordinates {
             .style("opacity", 1)
             .attr("stroke-width", 15)
 
-        this.selected  = highlight
         
     }
 }

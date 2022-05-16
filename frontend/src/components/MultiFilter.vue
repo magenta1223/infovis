@@ -2,27 +2,46 @@
 <!-- type, stat, 전포 환포 -->
     <div style="width:100%">
         <v-row>
-            <v-col cols="12">
-                <v-select
-                v-model="selectedTypes"
-                item-text="name"
-                item-value="type_index"
-                :items="items"
-                attach
-                chips
-                label="Types"
-                multiple
-                :menu-props="{ top: false, offsetY: true }"
-                @change="filter()"
-                >
-                <template #selection="{ item }">
-                    <v-chip :color="item.color">{{item.name}}</v-chip>
-                </template>
-
-                </v-select>
-            </v-col>
+            <v-select
+            item-text="text"
+            itme-value="value"
+            :items="Locales"
+            v-model="selectedLocale.value"
+            label="Locales"
+            outlined
+            @change="send()"
+            ></v-select>
         </v-row>
-        <v-row dense>
+        <v-row>
+            <v-text-field
+            label="검색하세요"
+            append-icon="mdi-magnify"
+            v-model="keyword"
+
+            @change="filter()"
+            > 
+            </v-text-field>
+        </v-row>
+        <v-row>
+            <v-select
+            v-model="selectedTypes"
+            item-text="name"
+            item-value="type_index"
+            :items="items"
+            attach
+            chips
+            label="Types"
+            multiple
+            :menu-props="{ top: false, offsetY: true }"
+            @change="filter()"
+            >
+            <template #selection="{ item }">
+                <v-chip :color="item.color">{{item.name}}</v-chip>
+            </template>
+
+            </v-select>
+        </v-row>
+        <v-row>
             <v-col cols = "6" class="justify-center">
                 <v-switch
                 v-model="IsLegendary"
@@ -41,31 +60,26 @@
             </v-col>
         </v-row>
         <v-row>
-            <v-col>
-                <StatSlider :stat="'HP'" :task="task" :vertical="true" @input="setVal"/>
-            </v-col>
-            <v-col>
-                <StatSlider :stat="'ATK'" :task="task" :vertical="true" @input="setVal"/>
-            </v-col>
-            <v-col>
-                <StatSlider :stat="'DEF'" :task="task" :vertical="true" @input="setVal"/>
-            </v-col>
-            <v-col>
-                <StatSlider :stat="'SP.ATK'" :task="task" :vertical="true" @input="setVal"/>
-            </v-col>
-            <v-col>
-                <StatSlider :stat="'SP.DEF'" :task="task" :vertical="true" @input="setVal"/>
-            </v-col>
-            <v-col>
-                <StatSlider :stat="'SPD'" :task="task" :vertical="true" @input="setVal"/>
-            </v-col>
+            <StatSlider :stat="'HP'" :task="task" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <v-col>
-                <StatSlider :stat="'TOTAL'" :task="task"  :vertical="false" @input="setVal"/>
-            </v-col>
+            <StatSlider :stat="'ATK'" :task="task" :vertical="false" @input="setVal"/>
         </v-row>
-
+        <v-row>
+            <StatSlider :stat="'DEF'" :task="task" :vertical="false" @input="setVal"/>
+        </v-row>
+        <v-row>
+            <StatSlider :stat="'SP.ATK'" :task="task" :vertical="false" @input="setVal"/>
+        </v-row>
+        <v-row>
+            <StatSlider :stat="'SP.DEF'" :task="task" :vertical="false" @input="setVal"/>
+        </v-row>
+        <v-row>
+            <StatSlider :stat="'SPD'" :task="task" :vertical="false" @input="setVal"/>
+        </v-row>
+        <v-row>
+            <StatSlider :stat="'TOTAL'" :task="task"  :vertical="false" @input="setVal"/>
+        </v-row>
     </div>
 </template>
 
@@ -80,6 +94,24 @@ let url = "http://127.0.0.1:8000/api/poketype/"
 export default {
     data() {
         return {
+            // for locales
+            selectedLocale: {
+                    text : 'English',
+                    value : 'en'
+            },
+            Locales: [
+                {
+                    text : 'English',
+                    value : 'en'
+                },
+                {
+                    text : '한국어',
+                    value : 'ko'
+                }
+            ],
+            // for search
+            keyword : "",
+            // for filter
             items : [],
             selectedTypes : [],
             IsLegendary : false,
@@ -98,7 +130,7 @@ export default {
     props : ['locale', 'task'],
 
     methods : {
-        fetchItems : function() {
+        fetchTypes : function() {
             axios({
                 method : "GET",
                 url : url,
@@ -145,11 +177,21 @@ export default {
             this.filter()
         },
 
+        send : function() {
+            this.$emit('locale', this.selectedLocale.value)
+        },
+
+
         filter : function(){
             this.limiter()
-            console.log(this.condition)
-            this.$emit('condition', this.condition)
+            this.$emit('condition',
+                {
+                    condition :  this.condition,
+                    keyword : this.keyword
+                })
         },
+
+        
 
         initialize : function(){
             this.items = []
@@ -172,17 +214,17 @@ export default {
 
 
     mounted() {
-        this.fetchItems()
+        this.fetchTypes()
     },
 
     watch : {
-        task : function(){
-            this.fetchItems()
-            this.initialize()
-        },
+        // task : function(){
+        //     this.fetchTypes()
+        //     this.initialize()
+        // },
 
         locale : function(){
-            this.fetchItems()
+            this.fetchTypes()
             this.initialize()
         }
     },
