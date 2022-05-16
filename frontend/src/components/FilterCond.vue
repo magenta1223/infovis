@@ -1,11 +1,14 @@
 <template>
     <div style="width:100%">
+        <!--item이 15개 이상이면 위에 경고메세지 같은거 -->
         <v-row>
-            <v-col cols ="4">
-                <svg id="radar"></svg>
+            <v-col>
+                <svg id="polycoords"></svg>
             </v-col>
+        </v-row>
+        <v-row>
 
-            <v-col cols = "8">
+            <v-col>
                 <v-data-table
                     :headers="headers[locale]"
                     :items="items"
@@ -22,15 +25,14 @@
 
 
 <script>
-import RadarChart from '../d3Chart/radar.js'
-//import axios from 'axios'
+import MultiCoordinates from "../d3Chart/multicoordinates.js"
+
 
 //let spriteUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/'
 
 export default {
     data() {
         return {
-            radarchart : "#radar",
             features : {
                 "en" : [['HP', 0], ['ATTACK', 1],[ 'DEFENSE', 2], ['SP.ATTACK', 3], ['SP.DEFENSE', 4], ['SPEED', 5]],
                 "ko" : [['체력', 0], ['공격', 1], ['방어', 2], ['특수공격', 3], ['특수방어', 4], ['스피드', 5]]  
@@ -66,9 +68,9 @@ export default {
     mounted() {
 
         console.log('filter mount', this.items)
-        this.radarchart = new RadarChart(this.radarchart, this.features[this.locale], 280, 280)
-        this.radarchart.initialize()
-        this.radarchart.update(this.items, "filter")
+        this.multicoords = new MultiCoordinates("#polycoords", this.features[this.locale], 1200, 280)
+        this.multicoords.initialize()
+        this.multicoords.update(this.items)
 
         //axios({
         //    method: "GET",
@@ -85,9 +87,12 @@ export default {
 
     watch : {
         items : function(){
-            this.radarchart.update(this.items, "filter")
+            console.log(this.selected)
+            this.multicoords.update(this.items)
         }
     },
+
+
 
 
 }

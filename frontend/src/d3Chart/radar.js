@@ -23,10 +23,10 @@ class RadarChart {
     initialize() {
         this.svg = d3.select(this.svg);
         this.container = this.svg.append("g");
-        this.axisAnnotate = this.svg.append("g")
-        this.points = this.svg.append("g")
-        this.tooltips = this.svg.append("g")
-        this.highlight = this.svg.append("g")
+        this.axisAnnotate = this.container.append("g")
+        this.points = this.container.append("g")
+        this.tooltips = this.container.append("g")
+        this.highlight = this.container.append("g")
 
         this.svg
             .attr("width", this.width + this.margin.left + this.margin.right)
@@ -34,15 +34,6 @@ class RadarChart {
 
         this.container
             .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-        this.axisAnnotate
-            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-        this.points
-            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-        this.tooltips
-            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-        this.highlight
-            .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-
             
         this.radialScale = d3.scalePow()
             .exponent(0.8)
@@ -80,6 +71,8 @@ class RadarChart {
             .attr("y", (d) => this.angleToY(d[1], 2 * this.width / 3 + 20))
             .attr("text-anchor", "middle")
             .text((d) => (d[0]));
+
+        
 
 
     }
@@ -129,27 +122,16 @@ class RadarChart {
         ]
     }
 
-    update(item, task){
+    update(item){
         
-        let colors = ""
-        if (task === "filter"){
-            colors = item.map((i) => (i.types[0].color))
-            item = item.map((i) => (this.parseStat(i)))
-        } else {
-            console.log(item)
-            colors = [item.types[0].color]
-            item = [this.parseStat(item)]
-        }
-
-        console.log(colors)
+        let colors = [item.types[0].color]
+        item = [this.parseStat(item)]
         
         // define paths
         let paths = this.container.selectAll("path")
             .data(item)
             .join("path")
         
-
-
         // add transition 
         paths
             .transition()
@@ -165,8 +147,6 @@ class RadarChart {
         paths
             .on('mouseover', (e, d) => {
                 e;d;
-                console.log(d)
-                console.log(e)
                 //Dim all blobs
                 d3.selectAll("path")
                     .transition()
@@ -194,19 +174,18 @@ class RadarChart {
                     .remove()
             });
 
-        if (task !== "filter"){
-            this.points.selectAll("circle")
-                .data(item.flat())
-                .join("circle")
-                .transition()
-                .attr("cx", (d) => (this.angleToX(d.key, d.value )))
-                .attr("cy", (d) => (this.angleToY(d.key, d.value )))
-                .attr("fill", "dark")
-                .attr("fill-opacity", 1)
-                .attr("stroke", "gray")
-                .attr('z-index', 200)
-                .attr("r", 3)
-        }
+        this.points.selectAll("circle")
+            .data(item.flat())
+            .join("circle")
+            .transition()
+            .attr("cx", (d) => (this.angleToX(d.key, d.value )))
+            .attr("cy", (d) => (this.angleToY(d.key, d.value )))
+            .attr("fill", "dark")
+            .attr("fill-opacity", 1)
+            .attr("stroke", "gray")
+            .attr('z-index', 200)
+            .attr("r", 3)
+        
 
     }
 }

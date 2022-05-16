@@ -4,7 +4,7 @@
             <!-- sprite & stats -->
             <v-row>
                 <v-col cols = "6">
-                    <v-img :src="imgSrc"/> 
+                    <v-img :src="imgSrc" max-width="400"  /> 
                 </v-col>
                 <v-col cols = "6">
                     <svg id="radar"></svg>
@@ -159,12 +159,12 @@ export default {
         this.fetchTypes()
         this.radarchart = new RadarChart("#radar", this.features[this.locale], 300, 300)
         this.radarchart.initialize()
-        this.radarchart.update(this.item, "retrieve")
+        this.radarchart.update(this.item)
     },
 
     watch : {
         item : function(){
-            this.radarchart.update(this.item.data, "retrieve")
+            this.radarchart.update(this.item.data)
             this.moves = this.item.moves.map( (d) => (d.move) )
             this.filteredMoves = this.moves
         }

@@ -165,7 +165,6 @@ export default {
                     locale : this.locale
                 }
             }).then((response) => {
-                console.log(response.data)
                 this.detail = response.data
                 this.task = 'retrieve'
             })
@@ -242,7 +241,7 @@ export default {
     watch : {
         locale : {
             handler(newVal, oldVal){
-                console.log(newVal, oldVal)
+                newVal;oldVal; // eslint
                 this.fetchItems()
             },
             immediate : true
@@ -256,12 +255,7 @@ export default {
 
     computed : {
         tableItems : function() {
-            console.log('computed')
-            if (this.searched.length > 0){
-                return this.searched
-            } else {
-                return this.items
-            }
+            return this.searched.length > 0 ? this.searched : this.items
         }
     }
 
