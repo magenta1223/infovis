@@ -278,6 +278,7 @@ def parsePokemon(pokemon_url, locales):
     poke_dict['is_mythical'] = pokemon['is_mythical']
     poke_dict['is_legendary'] = pokemon['is_legendary']
     poke_dict['description'] = getText(pokemon, locales)
+    poke_dict['isBaby'] = pokemon['is_baby']
     poke_dict['types'] = [ types[t['type']['name']][1]  for t in spec['types']]
     poke_dict['stats'] = { stat['stat']['name'] : stat['base_stat']  for stat in spec['stats']} 
     poke_dict['abilities'] = [ getID(a['ability']['url'])  for a in spec['abilities']]
@@ -395,7 +396,8 @@ def pokemonsToDB():
                 speed = pokemon['stats']['speed'],
                 total = sum(pokemon['stats'].values()),
                 evolves_from = pokemon['evolves_from'],
-                locale = LOCALES[locale]
+                locale = LOCALES[locale],
+                isBaby = pokemon['isBaby']
             )
             instance.save()
             # add abilities

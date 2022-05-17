@@ -62,9 +62,10 @@ class Pokemon(models.Model):
     abilities = models.ManyToManyField(Ability, related_name= 'abilities')
     types = models.ManyToManyField(PokeType, related_name= 'types')
     
-    # 원래는 foriegnkey로 넣는게 맞는데 그렇게 하려면 싹다 만들고 다시 수정해야돼서..
     evolves_from = models.IntegerField(blank= True, null = True)
     evolves_to = models.IntegerField(blank= True, null = True)
+
+    isBaby = models.BooleanField(default= False)
     
 class PokeMove(models.Model):
     # pokemon과 move가 many-to-many긴 한데

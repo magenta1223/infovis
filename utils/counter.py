@@ -141,21 +141,21 @@ def battleSimulation(actor, target):
     if actor['speed'] > target['speed']:
         # 확정 1타로 잡음
         if aBest_coef >= counter_factor:
-            return 0 
+            return 0, target['id'] 
         # 난수 1타에 죽을수도 있음. 카운터
         elif tBest_coef >= 0.9:
-            return tBest_coef
+            return tBest_coef, target['id'] 
         # 서로 1타는 아님
         else:
-            return 0
+            return 0, target['id'] 
     else:
         # 내가 먼저 맞는 경우 난수1타면 카운터
         if tBest_coef >= 0.9:
-            return tBest_coef
+            return tBest_coef, target['id'] 
         elif aBest_coef >= counter_factor:
-            return 0
+            return 0, target['id'] 
         else:
-            return 0
+            return 0, target['id'] 
       
 
     # 이제 스피드에 따라서 임의로 배틀

@@ -14,10 +14,6 @@ class MultiCoordinates {
     }
 
     initialize(){
-        // labels
-        // axes : 모두 같은 scale 이므로 각각 다르게 scale 표시할 필요는 없음
-        // 각 item의 primary type별로 coloring을 해주면 됨
-
         this.svg = d3.select(this.svg);
         this.xScale = d3.scalePoint()
             .domain(this.features.map((d)=>(d[0])))
@@ -133,22 +129,15 @@ class MultiCoordinates {
     }
 
     highlight(highlight){
-        // 이 체인을 외부에서 걸어야 함
-        // 어떤 요소를 클릭했을 때, 반응하도록
-        // 1) filtercond에서 event listener를 등록해야 함
-        // 2) The user brushes on the scatterplot. : multicoords에서 뭔가를 선택함. 이건 plot에 적용되는게 아니고, 개별 아이템임. 그냥 lines에 등록해버리자
-        // 2.brushCirclesis called, and an eventobject is passed. 그러면 highlight가 called
-        // 3.In brushCircles, get an array of the selected items, brushedItems. 그 안에서 선택된 items를 반환하고
-        // 4.In brushCircles, call fwith brushedItems. 그 item으로 f를 call함
-        // 5.In f, call histogram.update(brushedItems, “variety”) 그리고 multicoords와 identify를 동시에 update하면 된다. 
-        console.log('highlight',highlight)
+        // color to highlight
         let color = highlight.types[0].color
 
+        // set opacities of others to 0.1 
         this.lines.selectAll("path")
             .transition(30)
             .style("opacity", 0.1)
 
-    
+        // set highlight's opacity to 1 and width 15
         this.focusedLines
             .selectAll("path")
             .data([highlight])

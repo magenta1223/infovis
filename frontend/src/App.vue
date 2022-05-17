@@ -8,8 +8,8 @@
 vis part는 router로 구성함
 전부 비동기로 작동
  -->
-    <v-app class="container ma-0" fluid>
-        <v-container>
+    <v-app class="container ma-2" fluid>
+        <v-container class="ma-2">
             <v-row>
                 <v-col cols="2">
                     <MultiFilter

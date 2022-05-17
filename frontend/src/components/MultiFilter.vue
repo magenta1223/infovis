@@ -191,8 +191,6 @@ export default {
                 })
         },
 
-        
-
         initialize : function(){
             this.items = []
             this.selectedTypes = []

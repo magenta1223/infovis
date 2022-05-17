@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 import json
 from django.db.models import Q
 from django.core.management.base import BaseCommand
-
+from utils.postprocess import baby
 
 class Command(BaseCommand):
     help = 'Crawl data'
@@ -18,3 +18,4 @@ class Command(BaseCommand):
         movesToDB()
         abilitiesToDB()
         pokemonsToDB()
+        baby()

@@ -54,9 +54,6 @@
                     </template>
                 </v-select>
 
-            <!-- <v-row class="ma-4">
-                <StatSlider :stat="'POWER'" :task="task" :vertical="false" @input="setVal"/>
-            </v-row> -->
             <v-row>
                 <v-col>
                     <v-data-table
@@ -72,7 +69,7 @@
                 </v-col>
             </v-row>
         </v-card>
-        <v-btn @click="counter()">find counter</v-btn>
+        <v-btn v-if="!item.data.isBaby" @click="counter()">find counter</v-btn>
     </div>
 
 
@@ -166,6 +163,7 @@ export default {
             this.radarchart.update(this.item.data)
             this.moves = this.item.moves.map( (d) => (d.move) )
             this.filteredMoves = this.moves
+            console.log(this.item.data.isBaby)
         }
     },
 

@@ -1,22 +1,12 @@
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, generics # vieset import
+from rest_framework.response import Response
+from rest_framework import generics 
+from django.db.models import Q
 
 from .serializers import PokeTypeSerializer, PokemonRetrieveSerializer, PokemonSerializer
 from .models import * 
-from rest_framework import viewsets, generics # vieset import
-
-from rest_framework.decorators import api_view, permission_classes 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status, mixins
-from rest_framework import generics 
-import json
-
-from django.db.models import Q
-
 from .models import *
-from copy import deepcopy
-
 from utils.counter import * 
 
 
@@ -88,22 +78,32 @@ class CounterView(generics.GenericAPIView):
             Q(pokedex_index = kwargs['pokedex_index'])
         )[0]).data
 
+        # actor = PokemonSerializer(queryset.filter(
+        #     Q(locale__language__iexact = 'en') &
+        #     Q(pokedex_index = 1)
+        # )[0]).data
+
 
         targets = self.get_serializer(
-            data = self.queryset.filter(Q(locale__language__iexact = kwargs['locale'])),
+            data = self.queryset.filter(
+                Q(locale__language__iexact = kwargs['locale']) &
+                Q(isBaby = False)
+            ),
             many = True
             )
 
-        targets.is_valid()
 
-        print('??')
+
+
+        targets.is_valid()
         
         counters = []
         for target in targets.data:
             print(target['name'])
-            counter = battleSimulation(actor, target)
+            counter, index = battleSimulation(actor, target)
             if counter:
-                counters.append(counter)
+                print(target['name'])
+                counters.append(target['pokedex_index'])
         
         counterset = self.queryset.filter(
             Q(locale__language__iexact = kwargs['locale']) &
