@@ -86,6 +86,7 @@ import axios from 'axios'
 let spriteUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/'
 
 export default {
+    // template variables 
     data() {
         return {
             features : {
@@ -118,13 +119,17 @@ export default {
         // StatSlider
     },
 
-    props : ['item', 'locale'],
 
+    // template variables from upper parent component
+    props : ['item', 'locale'],
+    
+    // js function 
     methods : {
         counter : function(){
             this.$emit('counter', true)
         },
         fetchTypes : function() {
+            // get types by locale from the backend
             axios({
                 method : "GET",
                 url : 'http://127.0.0.1:8000/api/poketype/',
@@ -138,6 +143,7 @@ export default {
             })
         },
         filter : function(){
+            // filter moves by selected types
             let filtered = this.moves.filter((d) => (d.type.type_index === this.selectedTypes))
             if (filtered.length > 0){
                 this.filteredMoves = filtered
@@ -150,6 +156,7 @@ export default {
     },
         
     mounted() {
+        // run right after the page mounted 
         console.log(this.item)
         console.log(this.features[this.locale])
         this.fetchTypes()
@@ -159,6 +166,7 @@ export default {
     },
 
     watch : {
+        // works as the eventlistener
         item : function(){
             this.radarchart.update(this.item.data)
             this.moves = this.item.moves.map( (d) => (d.move) )
@@ -168,6 +176,7 @@ export default {
     },
 
     computed : {
+        // dynamic variable
         imgSrc : function() {
             return `${spriteUrl}${this.item.data.pokedex_index}.png`
         },

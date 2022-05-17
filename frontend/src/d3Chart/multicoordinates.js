@@ -15,10 +15,11 @@ class MultiCoordinates {
 
     initialize(){
         this.svg = d3.select(this.svg);
+
         this.xScale = d3.scalePoint()
             .domain(this.features.map((d)=>(d[0])))
             .range([0, this.width])
-
+        
         this.yScale = d3.scaleLinear()
             .domain([0, 200])
             .range([this.height, 0])
@@ -48,37 +49,14 @@ class MultiCoordinates {
     }
 
     parseStat(item){
-        return [
-            {
-                key : 0, // for angle(radial axis)
-                value : item.hp ? item.hp : 0,
-                name : "HP"
-            },
-            {
-                key : 1,
-                value : item.attack ? item.attack : 0,
-                name : "ATK"
-            },
-            {
-                key : 2,
-                value : item.defense ? item.defense : 0,
-                name : "DEF"
-            },
-            {
-                key : 3,
-                value : item.spattack ? item.spattack : 0,
-                name : "SPATK"
-            },
-            {
-                key : 4,
-                value : item.spdefense ? item.spdefense : 0,
-                name : "SPDEF"
-            },            {
-                key : 5,
-                value : item.speed ? item.speed : 0,
-                name : "SPD"
+        return this.features.map((i) => {
+            let stat = i[0].toLowerCase().replace('.', '')
+            return {
+                key : i[1],
+                value : item[stat] ? item[stat] : 0,
+                name  : i[0]
             }
-        ]
+        })
     }
 
     update(data) {
@@ -147,8 +125,6 @@ class MultiCoordinates {
             .style("stroke", color)
             .style("opacity", 1)
             .attr("stroke-width", 15)
-
-        
     }
 }
 

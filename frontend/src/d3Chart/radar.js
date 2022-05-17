@@ -4,7 +4,6 @@ class RadarChart {
     // reference
     // baseline : https://yangdanny97.github.io/blog/2019/03/01/D3-Spider-Chart
     // tooltip / eventlistener : http://bl.ocks.org/nbremer/21746a9668ffdf6d8242
-    // 
 
     margin = {
         top: 50, right: 50, bottom: 50, left: 50
@@ -89,37 +88,14 @@ class RadarChart {
     }
 
     parseStat(item){
-        return [
-            {
-                key : 0, // for angle(radial axis)
-                value : item.hp ? item.hp : 0,
-                name : "HP"
-            },
-            {
-                key : 1,
-                value : item.attack ? item.attack : 0,
-                name : "ATK"
-            },
-            {
-                key : 2,
-                value : item.defense ? item.defense : 0,
-                name : "DEF"
-            },
-            {
-                key : 3,
-                value : item.spattack ? item.spattack : 0,
-                name : "SPATK"
-            },
-            {
-                key : 4,
-                value : item.spdefense ? item.spdefense : 0,
-                name : "SPDEF"
-            },            {
-                key : 5,
-                value : item.speed ? item.speed : 0,
-                name : "SPD"
+        return this.features.map((i) => {
+            let stat = i[0].toLowerCase().replace('.', '')
+            return {
+                key : i[1],
+                value : item[stat] ? item[stat] : 0,
+                name  : i[0]
             }
-        ]
+        })
     }
 
     update(item){
