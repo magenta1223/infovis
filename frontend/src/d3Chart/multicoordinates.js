@@ -7,7 +7,6 @@ class MultiCoordinates {
 
     constructor(svg, features, width, height){
         this.svg = svg;
-        console.log(features)
         this.features = features; // statuses 
         this.width = width;
         this.height = height;
@@ -17,7 +16,7 @@ class MultiCoordinates {
         this.svg = d3.select(this.svg);
 
         this.xScale = d3.scalePoint()
-            .domain(this.features.map((d)=>(d[0])))
+            .domain(this.features.map(d=>d[0]))
             .range([0, this.width])
         
         this.yScale = d3.scaleLinear()
@@ -39,10 +38,9 @@ class MultiCoordinates {
 
         this.polyline = (d) => {
             return d3.line()(this.features.map(
-                (stat) => {
-                    // stat : [statName, statIndex]
-                    return [this.xScale(stat[0]), this.yScale(this.parseStat(d)[stat[1]].value)]
-                })
+                // stat : [statName, statIndex]
+                stat => [this.xScale(stat[0]), this.yScale(this.parseStat(d)[stat[1]].value)]
+                )
             );
         }
 
@@ -67,17 +65,15 @@ class MultiCoordinates {
             }
         }
 
-        let colors = data.map((d) => (d.types[0].color))
-
-        console.log('updating ! ')
+        let colors = data.map(d => d.types[0].color)
 
         this.axes.selectAll("g.axis")
             .data(this.features)
             .join("g")
             .attr("class", "axis")
-            .attr("transform", (d) => `translate(${this.xScale(d[0])}, 0)`)
+            .attr("transform", d => `translate(${this.xScale(d[0])}, 0)`)
             .each((d, i, nodes) => {
-                // all axis share same scales
+                // all axis share same scales, so only 1st axis needs ticks
                 i === 0 ? d3.select(nodes[i]).call(d3.axisLeft(this.yScale)) : d3.select(nodes[i]).call(d3.axisLeft(this.yScale).ticks(0))
             })
 
@@ -99,9 +95,6 @@ class MultiCoordinates {
             .style("stroke", (d, i) => (colors[i]))
             .attr("stroke-width", 15)
             .style("opacity", 0.5)
-            // .on("click", (e,d) => {
-            //     this.highlight(d)
-            // })
 
                 
     }

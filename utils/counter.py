@@ -90,9 +90,11 @@ def findOptimalMove(actor, target):
 
         if actor['attack'] >= actor['spattack']:
             movepower = actor['attack'] * 120 * 1.5 # 자속 120으로 때려박음
+            print(movepower, target_defense)
             coef = movepower / target_defense
         else:
             movepower = actor['spattack'] * 120 * 1.5 # 
+            print(movepower, target_spdefense)
             coef = movepower / target_spdefense
         # 뭘 만날지 모르는 상태
         # 그냥 standard setting
@@ -116,6 +118,8 @@ def battleSimulation(actor, target):
     # 그래서 가장 심플한 방법을 사용
     # 배운 기술 중 이 아니고, 자속 위력 120으로 때려박자
     # 
+
+    # 실제 초과치 
     aBest_coef = findOptimalMove(actor, target)
     tBest_coef = findOptimalMove(target, actor)
 
@@ -133,7 +137,7 @@ def battleSimulation(actor, target):
     # 무조건 1타를 기준으로 하자. 난수1타도 안됨. 운에 의한 요소 없이도 반드시 잡을 수 있다. 
     # 1.2 이상
 
-    counter_factor = 1.2
+    counter_factor = 1
 
     # 보수적인 기준에서 카운터를 계산함 
     # 상대는 난수 1타여도 킬 인정
@@ -141,21 +145,21 @@ def battleSimulation(actor, target):
     if actor['speed'] > target['speed']:
         # 확정 1타로 잡음
         if aBest_coef >= counter_factor:
-            return 0, target['id'] 
+            return 0
         # 난수 1타에 죽을수도 있음. 카운터
-        elif tBest_coef >= 0.9:
-            return tBest_coef, target['id'] 
+        elif tBest_coef >= 0.8:
+            return tBest_coef
         # 서로 1타는 아님
         else:
-            return 0, target['id'] 
+            return 0
     else:
         # 내가 먼저 맞는 경우 난수1타면 카운터
-        if tBest_coef >= 0.9:
-            return tBest_coef, target['id'] 
+        if tBest_coef >= 0.8:
+            return tBest_coef
         elif aBest_coef >= counter_factor:
-            return 0, target['id'] 
+            return 0
         else:
-            return 0, target['id'] 
+            return 0
       
 
     # 이제 스피드에 따라서 임의로 배틀

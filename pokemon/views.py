@@ -6,7 +6,6 @@ from django.db.models import Q
 
 from .serializers import PokeTypeSerializer, PokemonRetrieveSerializer, PokemonSerializer
 from .models import * 
-from .models import *
 from utils.counter import * 
 
 
@@ -71,18 +70,17 @@ class CounterView(generics.GenericAPIView):
 
         kwargs = request.query_params
 
-        print('counter', kwargs)
 
         actor = self.get_serializer(self.queryset.filter(
             Q(locale__language__iexact = kwargs['locale']) &
             Q(pokedex_index = kwargs['pokedex_index'])
         )[0]).data
+# queryset = Pokemon.objects.all()
 
-        # actor = PokemonSerializer(queryset.filter(
-        #     Q(locale__language__iexact = 'en') &
-        #     Q(pokedex_index = 1)
-        # )[0]).data
-
+# actor = PokemonSerializer(queryset.filter(
+#     Q(locale__language__iexact = kwargs['locale']) &
+#     Q(pokedex_index = kwargs['pokedex_index'])
+# )[0]).data
 
         targets = self.get_serializer(
             data = self.queryset.filter(
@@ -92,25 +90,32 @@ class CounterView(generics.GenericAPIView):
             many = True
             )
 
-
-
+# targets = PokemonSerializer(
+#     data = queryset.filter(
+#         Q(locale__language__iexact = kwargs['locale']) &
+#         Q(isBaby = False)
+#     ),
+#     many = True
+#     )
 
         targets.is_valid()
         
-        counters = []
+        counters = {}
         for target in targets.data:
-            print(target['name'])
-            counter, index = battleSimulation(actor, target)
+            counter = battleSimulation(actor, target)
             if counter:
-                print(target['name'])
-                counters.append(target['pokedex_index'])
+                counters[target['pokedex_index']] = counter
         
         counterset = self.queryset.filter(
             Q(locale__language__iexact = kwargs['locale']) &
-            Q(pokedex_index__in = counters)
+            Q(pokedex_index__in = list(counters.keys()))
         )
 
         serializer =  self.get_serializer(data = counterset, many = True)
         serializer.is_valid()
+
+        for i in range(len(serializer.data)):
+            serializer.data[i]['counterCoef'] = counters[serializer.data[i]['pokedex_index']]
+
     
         return Response(serializer.data)

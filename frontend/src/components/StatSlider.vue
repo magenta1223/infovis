@@ -28,7 +28,7 @@ export default {
         }
     },
 
-    props : ['stat', 'vertical', 'task'],
+    props : ['stat', 'vertical'],
 
     methods : {
         onChanged : function(){
@@ -43,11 +43,6 @@ export default {
         }
     },
 
-    watch : {
-        task : function(){
-            this.value = 0
-        }
-    }
 
 }
 </script>

@@ -40,8 +40,8 @@ class RadarChart {
             .range([0,300 * this.width / 600])
     
         this.line = d3.lineRadial()
-            .angle((d) => (Math.PI /3) * d.key) // key : 0~5 > angle : 0/3 pi ~ 5/3 pi
-            .radius((d) => this.radialScale(d.value)) 
+            .angle(d => (Math.PI /3) * d.key) // key : 0~5 > angle : 0/3 pi ~ 5/3 pi
+            .radius(d => this.radialScale(d.value)) 
             .curve(d3.curveCardinalClosed)
 
         this.container.selectAll("circle")
@@ -52,24 +52,24 @@ class RadarChart {
             .attr("fill", "gray")
             .attr("fill-opacity", 0.1)
             .attr("stroke", "gray")
-            .attr("r", (d) => (this.radialScale(d)))
+            .attr("r", d => this.radialScale(d))
 
         this.container.selectAll("text")
             .data(this.ticks)
             .join('text')
             .style("font-size", "10px")
             .attr("x", this.width / 2 + 5)
-            .attr("y", (d) => (this.height / 2 - this.radialScale(d)))
-            .text((d) => (d.toString()))
+            .attr("y", d => this.height / 2 - this.radialScale(d))
+            .text(d => d.toString())
 
         this.axisAnnotate.selectAll("text")
             .data(this.features)
             .join('text')
             .style("font-size", "13px")
-            .attr("x", (d) => this.angleToX(d[1], 2 * this.width / 3 + 20 )) // 300 > 220 2/3 + 20
-            .attr("y", (d) => this.angleToY(d[1], 2 * this.width / 3 + 20))
+            .attr("x", d => this.angleToX(d[1], 2 * this.width / 3 + 20 )) // 300 > 220 2/3 + 20
+            .attr("y", d => this.angleToY(d[1], 2 * this.width / 3 + 20))
             .attr("text-anchor", "middle")
-            .text((d) => (d[0]));
+            .text(d => d[0]);
 
         
 
@@ -133,10 +133,10 @@ class RadarChart {
                     .data(d)
                     .join('text')
                     .style("font-size", "13px")
-                    .attr("x", (d) => (this.angleToX(d.key, d.value + 20))) // 300 > 220 2/3 + 20
-                    .attr("y", (d) => (this.angleToY(d.key, d.value  + 20)))
+                    .attr("x", d => this.angleToX(d.key, d.value + 20)) // 300 > 220 2/3 + 20
+                    .attr("y", d => this.angleToY(d.key, d.value  + 20))
                     .attr("text-anchor", "middle")
-                    .text((d) => (d.value));
+                    .text(d => d.value);
             })
             .on('mouseout', (d) => {
                 d;
@@ -154,8 +154,8 @@ class RadarChart {
             .data(item.flat())
             .join("circle")
             .transition()
-            .attr("cx", (d) => (this.angleToX(d.key, d.value )))
-            .attr("cy", (d) => (this.angleToY(d.key, d.value )))
+            .attr("cx", d => this.angleToX(d.key, d.value ))
+            .attr("cy", d => this.angleToY(d.key, d.value ))
             .attr("fill", "dark")
             .attr("fill-opacity", 1)
             .attr("stroke", "gray")

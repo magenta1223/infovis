@@ -13,10 +13,9 @@ vis part는 router로 구성함
             <v-row>
                 <v-col cols="2">
                     <MultiFilter
-                    :task="task"
                     :locale="locale"
                     @condition="filterItems"
-                    @locale="fetchItems()"
+                    @localeChange="setLocale"
                     />
                 </v-col>
                 <v-col cols="6">
@@ -30,25 +29,16 @@ vis part는 router로 구성함
                     <IdentifyItem
                     :item="detail"
                     :locale="locale"
+                    @counter="counter"
                     />
                 </v-col>
             </v-row>
 
             <v-row>
                 <!-- Area2 for Visualization -->
-                <v-col>
 
-                    <!-- <div v-else-if="task === 'retrieve'">
-                        <IdentifyItem
-                        :item="detail"
-                        :locale="locale"
-                        @counter="counter"
-                        />
-                    </div> -->
-                    <div>
-                        <RetrieveCounter :locale="locale"/>
-                    </div>
-                </v-col>
+                <RetrieveCounter :locale="locale" :item="counters"/>
+
             </v-row>
         </v-container>
 
@@ -70,12 +60,12 @@ export default {
     data(){
         return {
             items : [{id : 1}, {id : 2}],
-            task : "",
             locale : "en",
             filteredItems : [],
             searched : [],
             detail : {data : {}, filteredMoves : []},
             filter : {},
+            counters : []
         }
     },
 
@@ -89,6 +79,8 @@ export default {
     methods : {
         setLocale : function(selectedLocale) {
             this.locale = selectedLocale
+            console.log('locale', this.locale)
+
         },
 
         fetchItems : function(){
@@ -118,7 +110,6 @@ export default {
             })
         },
 
-
         searchItems : function(keyword){
             this.searched = this.items.filter(el => el.name.includes(keyword))
         },
@@ -127,25 +118,19 @@ export default {
             if (filterTypes.length === 0){
                 return true
             }
-            //arr1이 
+            //required types > element's type
             if (pokemonsTypes.length < filterTypes.length){
                 return false
             } else {
-                let type_indices = [] 
-                for (let i in pokemonsTypes){
-                    type_indices.push(pokemonsTypes[i].type_index)
+                // if not, required length <= element's length
+                let type_indices = pokemonsTypes.map(d => d.type_index)
+                for (let i in filterTypes){
+                    if (!(type_indices.includes(filterTypes[i]))){
+                        return false
+                    }
                 }
-                type_indices.sort()
-                filterTypes.sort()
-                let idx_string = type_indices.join(' ')
-                let cond_string = filterTypes.join(' ')
-                if (idx_string === cond_string){
-                    return true
-                } else if (idx_string.includes(cond_string)) { 
-                    return true
-                } else {
-                    return false
-                }
+                return true
+
             }
         },
 
@@ -167,8 +152,8 @@ export default {
             filtered = filtered.filter(el => el.spdefense >= cond.spdefense)
             filtered = filtered.filter(el => el.speed >= cond.speed)
             filtered = filtered.filter(el => el.total >= cond.total)
-            filtered = filtered.filter(el => el.is_legendary === cond.IsLegendary)
-            filtered = filtered.filter(el => el.is_mythical === cond.IsMythical)
+            filtered = filtered.filter(el => cond.IsLegendary? el.is_legendary: true)
+            filtered = filtered.filter(el => cond.IsMythical? el.is_mythical: true)
             filtered = filtered.filter(el => this.contain(el.types, cond.selectedTypes))
             this.filteredItems = filtered
             if (this.filteredItems.length === 0){
@@ -177,12 +162,21 @@ export default {
             this.filter = cond
         },
         
-
-    
-
         counter : function(c){
-            c;
-            this.task = 'counter'
+            c; 
+            axios({
+                method : "GET",
+                url : "http://127.0.0.1:8000/api/counter/",
+                params : {
+                    locale : this.locale,
+                    pokedex_index : this.detail.data.pokedex_index
+                }
+            }).then(response => {
+                this.counters = response.data
+            }).catch(response => {
+                console.log("Failed", response)
+            })
+
         }
 
     },
@@ -200,11 +194,6 @@ export default {
                 this.fetchItems()
             },
             immediate : true
-        },
-
-        task : function(){
-            this.filteredItems = []
-            this.keyword = ""
         }
     },
 

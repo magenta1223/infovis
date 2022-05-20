@@ -60,25 +60,25 @@
             </v-col>
         </v-row>
         <v-row>
-            <StatSlider :stat="'HP'" :task="task" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="'HP'" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'ATK'" :task="task" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="'ATK'" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'DEF'" :task="task" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="'DEF'" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'SP.ATK'" :task="task" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="'SP.ATK'" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'SP.DEF'" :task="task" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="'SP.DEF'" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'SPD'" :task="task" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="'SPD'" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'TOTAL'" :task="task"  :vertical="false" @input="setVal"/>
+            <StatSlider :stat="'TOTAL'" :vertical="false" @input="setVal"/>
         </v-row>
     </div>
 </template>
@@ -127,7 +127,7 @@ export default {
         }
     },
 
-    props : ['locale', 'task'],
+    props : ['locale'],
 
     methods : {
         fetchTypes : function() {
@@ -178,7 +178,8 @@ export default {
         },
 
         send : function() {
-            this.$emit('locale', this.selectedLocale.value)
+            console.log('filter',  this.selectedLocale.value)
+            this.$emit('localeChange', this.selectedLocale.value)
         },
 
 
@@ -216,11 +217,6 @@ export default {
     },
 
     watch : {
-        // task : function(){
-        //     this.fetchTypes()
-        //     this.initialize()
-        // },
-
         locale : function(){
             this.fetchTypes()
             this.initialize()
