@@ -37,23 +37,12 @@
             
             <!-- Available moves -->
             <v-card-title>Moves</v-card-title>
-                <v-select
-                v-model="selectedTypes"
-                class="mb-4 ml-4 mr-4"
-                item-text="name"
-                item-value="type_index"
-                :items="types"
-                attach
-                chips
-                label="Types"
-                :menu-props="{ top: false, offsetY: true }"
-                @change="filter()"
-                >
-                    <template #selection="{ item }">
-                        <v-chip :color="item.color">{{item.name}}</v-chip>
-                    </template>
-                </v-select>
-
+                <TypeFilter
+                :locale="locale"
+                :csshelper="'mb-4 ml-4 mr-4'"
+                :multiple="false"
+                @filter="filter"
+                />
             <v-row>
                 <v-col>
                     <v-data-table
@@ -78,8 +67,7 @@
 
 <script>
 import RadarChart from '../d3Chart/radar.js'
-// import StatSlider from './StatSlider.vue'
-import axios from 'axios'
+import TypeFilter from "./TypeFilter.vue"
 
 //import axios from 'axios'
 
@@ -116,7 +104,7 @@ export default {
     },
 
     components : {
-        // StatSlider
+        TypeFilter
     },
 
 
@@ -128,23 +116,10 @@ export default {
         counter : function(){
             this.$emit('counter', true)
         },
-        fetchTypes : function() {
-            // get types by locale from the backend
-            axios({
-                method : "GET",
-                url : 'http://127.0.0.1:8000/api/poketype/',
-                params : {
-                    locale : this.locale
-                }
-            }).then( (response) => {
-                this.types = response.data
-            }).catch((response) => {
-                console.log('Failed', response)
-            })
-        },
-        filter : function(){
+
+        filter : function(selectedTypes){
             // filter moves by selected types
-            let filtered = this.moves.filter((d) => (d.type.type_index === this.selectedTypes))
+            let filtered = this.moves.filter((d) => (d.type.type_index === selectedTypes))
             if (filtered.length > 0){
                 this.filteredMoves = filtered
             } else {
@@ -157,9 +132,6 @@ export default {
         
     mounted() {
         // run right after the page mounted 
-        console.log(this.item)
-        console.log(this.features[this.locale])
-        this.fetchTypes()
         this.radarchart = new RadarChart("#radar", this.features[this.locale], 250, 250)
         this.radarchart.initialize()
         this.radarchart.update(this.item)
@@ -171,7 +143,6 @@ export default {
             this.radarchart.update(this.item.data)
             this.moves = this.item.moves.map( (d) => (d.move) )
             this.filteredMoves = this.moves
-            console.log(this.item.data.isBaby)
         }
     },
 

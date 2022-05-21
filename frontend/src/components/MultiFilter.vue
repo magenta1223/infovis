@@ -23,23 +23,12 @@
             </v-text-field>
         </v-row>
         <v-row>
-            <v-select
-            v-model="selectedTypes"
-            item-text="name"
-            item-value="type_index"
-            :items="items"
-            attach
-            chips
-            label="Types"
-            multiple
-            :menu-props="{ top: false, offsetY: true }"
-            @change="filter()"
-            >
-            <template #selection="{ item }">
-                <v-chip :color="item.color">{{item.name}}</v-chip>
-            </template>
-
-            </v-select>
+            <TypeFilter
+            :locale="locale"
+            :csshelper="''"
+            :multiple="true"
+            @filter="addType"
+            />
         </v-row>
         <v-row>
             <v-col cols = "6" class="justify-center">
@@ -85,10 +74,8 @@
 
 
 <script>
-import axios from 'axios'
 import StatSlider from './StatSlider.vue'
-
-let url = "http://127.0.0.1:8000/api/poketype/"
+import TypeFilter from './TypeFilter.vue'
 
 
 export default {
@@ -112,7 +99,6 @@ export default {
             // for search
             keyword : "",
             // for filter
-            items : [],
             selectedTypes : [],
             IsLegendary : false,
             IsMythical : false,
@@ -130,20 +116,10 @@ export default {
     props : ['locale'],
 
     methods : {
-        fetchTypes : function() {
-            axios({
-                method : "GET",
-                url : url,
-                params : {
-                    locale : this.locale
-                }
-            }).then( (response) => {
-                console.log(response)
-                this.items = response.data
-                console.log(this.items)
-            }).catch((response) => {
-                console.log('Failed', response)
-            })
+        addType : function(selectedTypes){
+            this.selectedTypes = selectedTypes
+            this.limiter()
+            this.filter()
         },
 
         limiter : function() {
@@ -157,7 +133,9 @@ export default {
                 }
             } 
         },
+
         setVal : function(newVal){
+            // hard coding >> soft
             let stat = newVal.stat
             if (stat === "HP"){
                 this.hp = newVal.value
@@ -182,7 +160,6 @@ export default {
             this.$emit('localeChange', this.selectedLocale.value)
         },
 
-
         filter : function(){
             this.limiter()
             this.$emit('condition',
@@ -193,7 +170,6 @@ export default {
         },
 
         initialize : function(){
-            this.items = []
             this.selectedTypes = []
             this.IsLegendary = false
             this.IsMythical = false
@@ -208,17 +184,12 @@ export default {
     },
 
     components : {
-        StatSlider
-    },
-
-
-    mounted() {
-        this.fetchTypes()
+        StatSlider,
+        TypeFilter
     },
 
     watch : {
         locale : function(){
-            this.fetchTypes()
             this.initialize()
         }
     },
