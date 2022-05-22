@@ -6,7 +6,7 @@ class RadarChart {
     // tooltip / eventlistener : http://bl.ocks.org/nbremer/21746a9668ffdf6d8242
 
     margin = {
-        top: 50, right: 50, bottom: 50, left: 50
+        top: 60, right: 60, bottom: 60, left: 60
     }
 
     ticks = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180];
@@ -66,8 +66,8 @@ class RadarChart {
             .data(this.features)
             .join('text')
             .style("font-size", "13px")
-            .attr("x", d => this.angleToX(d[1], 2 * this.width / 3 + 20 )) // 300 > 220 2/3 + 20
-            .attr("y", d => this.angleToY(d[1], 2 * this.width / 3 + 20))
+            .attr("x", d => this.angleToX(d[1], 2 * this.width / 3 + 60 )) // 300 > 220 2/3 + 20
+            .attr("y", d => this.angleToY(d[1], 2 * this.width / 3 + 60))
             .attr("text-anchor", "middle")
             .text(d => d[0]);
 
@@ -127,16 +127,17 @@ class RadarChart {
                 d3.selectAll("path")
                     .transition()
                     .duration(200)
-                    .style("fill-opacity", 0.1); 
+                    .style("fill-opacity", 0.8); 
 
                 this.tooltips.selectAll("text")
                     .data(d)
                     .join('text')
                     .style("font-size", "13px")
                     .attr("x", d => this.angleToX(d.key, d.value + 20)) // 300 > 220 2/3 + 20
-                    .attr("y", d => this.angleToY(d.key, d.value  + 20))
+                    .attr("y", d => this.angleToY(d.key, d.value + 20))
                     .attr("text-anchor", "middle")
-                    .text(d => d.value);
+                    .text(d => d.value)
+                    ;
             })
             .on('mouseout', (d) => {
                 d;

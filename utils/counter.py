@@ -44,14 +44,6 @@ def calcValues(pokemon):
     }
     return values
 
-def movePower(pokemon):
-    """
-    Caculate the move power
-    """
-    if pokemon['attack'] >= pokemon['spattack']:
-        return pokemon['attack'] * 120 * 1.5 # 자속 120으로 때려박음
-    else:
-        return pokemon['spattack'] * 120 * 1.5 # 
 
 
 def typeCoef(moveType, targetTypes):
@@ -85,16 +77,14 @@ def findOptimalMove(actor, target):
     typecoef = ""
     for atype in actorTypes:
         typecoef = typeCoef(atype, targetTypes)
-        movepower = movePower(actor) * typecoef
-
 
         if actor['attack'] >= actor['spattack']:
-            movepower = actor['attack'] * 120 * 1.5 # 자속 120으로 때려박음
-            print(movepower, target_defense)
+            movepower = actor['attack'] * 120 * 1.5 * typecoef# 자속 120으로 때려박음
+            #print(movepower, target_defense)
             coef = movepower / target_defense
         else:
-            movepower = actor['spattack'] * 120 * 1.5 # 
-            print(movepower, target_spdefense)
+            movepower = actor['spattack'] * 120 * 1.5 * typecoef # 
+            #print(movepower, target_spdefense)
             coef = movepower / target_spdefense
         # 뭘 만날지 모르는 상태
         # 그냥 standard setting
@@ -103,72 +93,38 @@ def findOptimalMove(actor, target):
         # 굳이 변태같은 플레이를 상정하지는 말자
         if coef > best_coef:
             best_coef = coef
-
+    
     return best_coef
 
 def battleSimulation(actor, target):
  
-    # 상대에게 가할 수 있는 최고의 기술을 찾음
-    # 물론 해당 기술을 안 배웠을 수도 있지만.. 아무튼간에 
-    # 이론 상 이길 수 있냐 정도로..
-    # 실제 배틀은 훨씬 복잡함. 
-    # 치명타확률, 선공기, 풀죽기, 특성, 도구, 필드효과, 성격, 노력치, 개체값 등 ...
-    # 물론 계산할 수 는 있음. 그러나 새로운 정보의 "탐색"에 초점을 맞춘 것. 내가 ~~~한 기술배치 쟤가 ~한 기술배치에 무슨 도구에 어쩌고 저쩌고
-    # 수백만개의 경우가 나오고 컴퓨터 터진다. 
-    # 그래서 가장 심플한 방법을 사용
-    # 배운 기술 중 이 아니고, 자속 위력 120으로 때려박자
-    # 
-
-    # 실제 초과치 
     aBest_coef = findOptimalMove(actor, target)
     tBest_coef = findOptimalMove(target, actor)
-
-    # 이렇게 하지말고
-
-    # 원래는 공격상성 / 방어상성 뭐 이런걸로 했는데
-    # 공격상성불리가 뭔 의미임! 그냥 피가 안다는건데
-    # 무조건 방어상성으로 간다
-
-    # 우선 최종진화체만을 기준으로 함
-    # 배틀 시뮬레이션을 해본다
-
-    # 지진에 카운터 맞는 경우면 사실 모든게 카운터긴 함. 
-    # 그런 식이면 굉장히 곤란.. 그러면 뭐 비행 아니면 카운터가 넘쳐날걸
-    # 무조건 1타를 기준으로 하자. 난수1타도 안됨. 운에 의한 요소 없이도 반드시 잡을 수 있다. 
-    # 1.2 이상
-
     counter_factor = 1
 
     # 보수적인 기준에서 카운터를 계산함 
     # 상대는 난수 1타여도 킬 인정
     # 나는 확정 1타일 때만 인정
+
     if actor['speed'] > target['speed']:
-        # 확정 1타로 잡음
+        # 확정 1타
         if aBest_coef >= counter_factor:
             return 0
         # 난수 1타에 죽을수도 있음. 카운터
-        elif tBest_coef >= 0.8:
+        elif tBest_coef >= 0.9:
             return tBest_coef
         # 서로 1타는 아님
         else:
             return 0
     else:
-        # 내가 먼저 맞는 경우 난수1타면 카운터
-        if tBest_coef >= 0.8:
+        # 난수 1타
+        if tBest_coef >= 0.9:
             return tBest_coef
-        elif aBest_coef >= counter_factor:
+        # 난수 1타 이하 + 내가 확정 1타
+        elif aBest_coef >= 1:
             return 0
+        # 서로 1타는 아님
         else:
             return 0
       
-
-    # 이제 스피드에 따라서 임의로 배틀
-    # 을 하는데? 실제 돌리는거 말고 로직이 있지 않을까?
-    # 어쩔 수 없다. 1번에 끝날지 안끝날지 안돌리고 어케암 ㅋㅋ
-    # 이렇게 모든 target pokemon에 대해서 찾고
-    # 그리고 stacked radial bar를 왜 씀?
-    # 얼마나 불리한지를 계수로 뽑아야 함
-    # 결정력 / 내구력 비율로 합시다
-    # 설명 text도 넣어주면 좋겠네용
-
     

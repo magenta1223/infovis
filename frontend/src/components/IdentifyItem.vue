@@ -25,7 +25,7 @@
             </v-card-text>
             <v-divider class="mx-4"></v-divider>
             <!-- Abilities -->
-            <v-card-title>Abilities</v-card-title>
+            <v-card-title>{{ locale == "en" ? "Abilities" : "특성"}}</v-card-title>
             <v-card-text v-for="ability in item.data.abilities" :key="ability.id" class="text-start">
                 <div style="color:black">
                     {{ability.name}}
@@ -36,7 +36,7 @@
             </v-card-text>
             
             <!-- Available moves -->
-            <v-card-title>Moves</v-card-title>
+            <v-card-title>{{ locale == "en" ? "Moves" : "기술"}}</v-card-title>
                 <TypeFilter
                 :locale="locale"
                 :csshelper="'mb-4 ml-4 mr-4'"
@@ -58,7 +58,6 @@
                 </v-col>
             </v-row>
         </v-card>
-        <v-btn v-if="!item.data.isBaby" @click="counter()">find counter</v-btn>
     </div>
 
 
@@ -113,10 +112,6 @@ export default {
     
     // js function 
     methods : {
-        counter : function(){
-            this.$emit('counter', true)
-        },
-
         filter : function(selectedTypes){
             // filter moves by selected types
             let filtered = this.moves.filter((d) => (d.type.type_index === selectedTypes))
@@ -132,7 +127,7 @@ export default {
         
     mounted() {
         // run right after the page mounted 
-        this.radarchart = new RadarChart("#radar", this.features[this.locale], 250, 250)
+        this.radarchart = new RadarChart("#radar", this.features[this.locale], 200, 250)
         this.radarchart.initialize()
         this.radarchart.update(this.item)
     },

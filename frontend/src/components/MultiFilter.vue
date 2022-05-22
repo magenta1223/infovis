@@ -7,14 +7,14 @@
             itme-value="value"
             :items="Locales"
             v-model="selectedLocale.value"
-            label="Locales"
+            :label="locale =='en'? 'Locales' : '언어'"
             outlined
             @change="send()"
             ></v-select>
         </v-row>
         <v-row>
             <v-text-field
-            label="검색하세요"
+            :label="locale =='en'? 'Search' : '검색하세요'"
             append-icon="mdi-magnify"
             v-model="keyword"
 
@@ -34,7 +34,7 @@
             <v-col cols = "6" class="justify-center">
                 <v-switch
                 v-model="IsLegendary"
-                label="legendary"
+                :label="locale == 'en' ? 'Legendary': '전설'"
                 inset
                 @change="filter()"
                 ></v-switch>
@@ -42,32 +42,32 @@
             <v-col cols = "6" class="justify-center">
                 <v-switch
                 v-model="IsMythical"
-                label="mythical"
+                :label="locale == 'en' ? 'Mythical': '환상'"
                 inset
                 @change="filter()"
                 ></v-switch>
             </v-col>
         </v-row>
         <v-row>
-            <StatSlider :stat="'HP'" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['hp']" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'ATK'" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['attack']" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'DEF'" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['defense']" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'SP.ATK'" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['spattack']" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'SP.DEF'" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['spdefense']" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'SPD'" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['speed']" :vertical="false" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="'TOTAL'" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['total']" :vertical="false" @input="setVal"/>
         </v-row>
     </div>
 </template>
@@ -98,6 +98,11 @@ export default {
             ],
             // for search
             keyword : "",
+            stats : {
+                "en" : {"hp" : "HP", "attack" : "ATK", "defense" : "DEF", "spattack" : "SP.ATK", "spdefense" : "SP.DEF", "speed" : "SPD", "total" : "TOTAL"},
+                "ko" : {"hp" : "체력", "attack" : "공격", "defense" : "방어", "spattack" : "특수공격", "spdefense" : "특수방어", "speed" : "속도", "total" : "총합"}
+            },
+
             // for filter
             selectedTypes : [],
             IsLegendary : false,

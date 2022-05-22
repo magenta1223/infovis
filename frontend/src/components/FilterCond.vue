@@ -23,6 +23,7 @@
                         <td>{{ item.spattack }}</td>
                         <td>{{ item.spdefense }}</td>
                         <td>{{ item.speed }}</td>
+                        <td>{{ item.total }}</td>
                         <td> <v-chip v-for="type in item.types" :key="type.id" :color="type.color" small class="ma-1">{{type.name}}</v-chip> </td>
                     </tr>
                 </template>
@@ -55,6 +56,7 @@ export default {
                     {text : 'SP.Attack', value : 'spattack'},
                     {text : 'SP.Defense', value : 'spdefense'},
                     {text : 'Speed', value : 'speed'},
+                    {text : 'Total', value : 'total'},
                     {text : 'Type', value : 'types'}
 
                 ],
@@ -66,6 +68,7 @@ export default {
                     {text : '특수공격', value : 'spattack'},
                     {text : '특수방어', value : 'spdefense'},
                     {text : '스피드', value : 'speed'},
+                    {text : '총합', value : 'total'},
                     {text : '타입', value : 'type'}
                 ]
             },

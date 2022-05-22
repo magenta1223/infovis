@@ -1,5 +1,5 @@
 <template>
-<v-container>
+<v-container id="container">
     <v-row>
         <v-col>
             <v-select
@@ -7,17 +7,9 @@
             itme-value="value"
             :items="orders"
             v-model="selectedOrder.value"
-            label="Orders"
+            :label="locale === 'en' ?  'Orders': '정렬방법'"
             outlined
             ></v-select>
-        </v-col>
-        <v-col>
-            <TypeFilter
-            :locale="locale"
-            :csshelper="''"
-            :multiple="false"
-            @filter="filter"
-            />
         </v-col>
     </v-row>
 
@@ -30,7 +22,7 @@
 
 <script>
 import BarChart from "../d3Chart/barchart.js"
-import TypeFilter from './TypeFilter.vue'
+import * as d3 from "d3";
 
 export default {
     data: () => {
@@ -40,6 +32,7 @@ export default {
                     value : 'desc'
             },
             orders: [
+                
                 {
                     text : 'Descending',
                     value : 'desc'
@@ -53,39 +46,46 @@ export default {
                     value : 'type'
                 }
             ],
+            filteredItems : []
         }
     },
 
-    props : ['item', 'locale'],
+    props : ['items', 'locale'],
 
     components:{
-        TypeFilter
     },
 
     methods : {
-        filter : function(selectedType){
-
-            this.item.filter(e => e.)
-
-        }
         
     },
 
     mounted() {
         this.barchart = new BarChart("#bar", 1800, 600)
         this.barchart.initialize()
-        this.barchart.update(this.item, this.selectedOrder.value)
+        this.barchart.update(this.items, this.selectedOrder.value)
+        this.barchart.rects.on("click", e => {
+            console.log('rect', e.target)
+            this.selected = e.srcElement.__data__
+            this.barchart.highlight(this.selected)
+        })
+        
+        d3.select("#container").on("click",e => {
+            if (e.target.tagName !== "rect" & e.target.tagName !== "text") {
+                console.log('off')
+                this.barchart.off()
+            }
+        });
     },
 
     watch : {
-        item : function(){
-            this.barchart.update(this.item, this.selectedOrder.value)
+        items : function(){
+            this.barchart.update(this.items, this.selectedOrder.value)
         },
 
         selectedOrder : {
             handler(newVal, oldVal){
                 oldVal; // eslint
-                this.barchart.update(this.item, newVal.value)
+                this.barchart.update(this.items, newVal.value)
             },
             immediate : true,
             deep : true

@@ -29,15 +29,17 @@ vis part는 router로 구성함
                     <IdentifyItem
                     :item="detail"
                     :locale="locale"
-                    @counter="counter"
                     />
                 </v-col>
+            </v-row>
+            <v-row>
+                <v-btn v-if="!detail.data.isBaby" @click="counter()">{{ locale === 'en' ? 'find counter' : '카운터 찾기'}}</v-btn>
             </v-row>
 
             <v-row>
                 <!-- Area2 for Visualization -->
 
-                <RetrieveCounter :locale="locale" :item="counters"/>
+                <RetrieveCounter :locale="locale" :items="counters"/>
 
             </v-row>
         </v-container>
@@ -162,8 +164,7 @@ export default {
             this.filter = cond
         },
         
-        counter : function(c){
-            c; 
+        counter : function(){
             axios({
                 method : "GET",
                 url : "http://127.0.0.1:8000/api/counter/",

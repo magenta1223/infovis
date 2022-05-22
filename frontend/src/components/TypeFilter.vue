@@ -7,7 +7,7 @@
     :items="types"
     attach
     chips
-    label="Types"
+    :label="locale =='en'? 'Types' : '타입'"
     :multiple="multiple"
     :menu-props="{ top: false, offsetY: true }"
     @change="send()"
