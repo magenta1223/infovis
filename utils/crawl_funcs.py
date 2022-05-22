@@ -1,13 +1,8 @@
-from asyncio.windows_events import NULL
-from distutils.log import WARN
 import requests
 import json
 import pandas as pd
 import time
 import os
-import pickle
-import numpy as np
-from collections import deque
 from pokemon.models import *
 from django.db.models import Q
 from tqdm import tqdm
