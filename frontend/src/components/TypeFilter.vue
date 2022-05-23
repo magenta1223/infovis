@@ -39,7 +39,7 @@ export default {
             // get types by locale from the backend
             axios({
                 method : "GET",
-                url : 'http://127.0.0.1:8000/api/poketype/',
+                url : localStorage.getItem('url') + 'poketype/',
                 params : {
                     locale : this.locale
                 }

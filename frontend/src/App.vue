@@ -56,7 +56,8 @@ import RetrieveCounter from './components/RetrieveCounter.vue'
 import axios from "axios";
 
 
-let url = "http://127.0.0.1:8000/api/pokemon/"
+
+localStorage.setItem('url', "http://127.0.0.1:8000/api/")
 
 export default {
     data(){
@@ -88,7 +89,7 @@ export default {
         fetchItems : function(){
             axios({
                 method: "GET",
-                url : url,
+                url : localStorage.getItem('url') + 'pokemon/',
                 params:{
                     locale : this.locale
                 }
@@ -103,7 +104,7 @@ export default {
         retrieve : function(id){
             axios({
                 method : "GET",
-                url : url + id,
+                url : localStorage.getItem('url') + 'pokemon/' + id,
                 params : {
                     locale : this.locale
                 }
@@ -167,7 +168,7 @@ export default {
         counter : function(){
             axios({
                 method : "GET",
-                url : "http://127.0.0.1:8000/api/counter/",
+                url :  localStorage.getItem('url') + "counter/",
                 params : {
                     locale : this.locale,
                     pokedex_index : this.detail.data.pokedex_index
