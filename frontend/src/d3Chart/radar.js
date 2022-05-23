@@ -16,7 +16,6 @@ class RadarChart {
         this.features = features;
         this.width = width;
         this.height = height;
-        this.handlers = {}; // eventlisteners
     }
 
     initialize() {
@@ -33,17 +32,19 @@ class RadarChart {
 
         this.container
             .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
-            
+        
         this.radialScale = d3.scalePow()
             .exponent(0.8)
             .domain([0,180])
             .range([0,300 * this.width / 600])
     
+        // degree to radian
         this.line = d3.lineRadial()
-            .angle(d => (Math.PI /3) * d.key) // key : 0~5 > angle : 0/3 pi ~ 5/3 pi
+            .angle(d => (Math.PI /3) * d.key) // // degree to radian. key : 0~5 > angle : 0/3 pi ~ 5/3 pi
             .radius(d => this.radialScale(d.value)) 
             .curve(d3.curveCardinalClosed)
 
+        // concentric circles
         this.container.selectAll("circle")
             .data(this.ticks)
             .join("circle")
@@ -54,20 +55,13 @@ class RadarChart {
             .attr("stroke", "gray")
             .attr("r", d => this.radialScale(d))
 
-        this.container.selectAll("text")
-            .data(this.ticks)
-            .join('text')
-            .style("font-size", "10px")
-            .attr("x", this.width / 2 + 5)
-            .attr("y", d => this.height / 2 - this.radialScale(d))
-            .text(d => d.toString())
 
         this.axisAnnotate.selectAll("text")
             .data(this.features)
             .join('text')
             .style("font-size", "13px")
-            .attr("x", d => this.angleToX(d[1], 2 * this.width / 3 + 60 )) // 300 > 220 2/3 + 20
-            .attr("y", d => this.angleToY(d[1], 2 * this.width / 3 + 60))
+            .attr("x", d => this.angleToX(d[1], 2 * this.width / 3 + 100 )) // 300 > 220 2/3 + 20
+            .attr("y", d => this.angleToY(d[1], 2 * this.width / 3 + 100))
             .attr("text-anchor", "middle")
             .text(d => d[0]);
 
@@ -75,18 +69,21 @@ class RadarChart {
 
 
     }
-
+    
+    // polar coordinates to orthogonal coordinate 
     angleToX(angle, value){
         // d3's angle starts from zenith
         let x = Math.cos((Math.PI / 2) - (2 * Math.PI * angle / this.features.length)) * this.radialScale(value)
         return this.width / 2 + x;
     }
 
+    // polar coordinates to orthogonal coordinate
     angleToY(angle, value){
         let y =  Math.sin((Math.PI / 2) - (2 * Math.PI * angle / this.features.length)) * this.radialScale(value)
         return this.height / 2 - y ;
     }
-
+    
+    // parse item for radar chart
     parseStat(item){
         return this.features.map((i) => {
             let stat = i[0].toLowerCase().replace('.', '')
@@ -101,6 +98,7 @@ class RadarChart {
     update(item){
         
         let colors = [item.types[0].color]
+        // for .data()
         item = [this.parseStat(item)]
         
         // define paths
@@ -123,25 +121,30 @@ class RadarChart {
         paths
             .on('mouseover', (e, d) => {
                 e;d;
-                //Dim all blobs
+                // highlight the area
                 d3.selectAll("path")
                     .transition()
                     .duration(200)
                     .style("fill-opacity", 0.8); 
 
+                // text tooltip
                 this.tooltips.selectAll("text")
                     .data(d)
                     .join('text')
                     .style("font-size", "13px")
-                    .attr("x", d => this.angleToX(d.key, d.value + 20)) // 300 > 220 2/3 + 20
-                    .attr("y", d => this.angleToY(d.key, d.value + 20))
+                    .attr("x", d => this.angleToX(d.key, d.value + 30)) // 300 > 220 2/3 + 20
+                    .attr("y", d => this.angleToY(d.key, d.value + 30))
                     .attr("text-anchor", "middle")
                     .text(d => d.value)
-                    ;
+                
+                // lower the opacity of text
+                this.axisAnnotate.selectAll("text")
+                    .style('opacity', 0.2)
+                    
             })
             .on('mouseout', (d) => {
                 d;
-                //Bring back all blobs
+                // bring back
                 d3.selectAll("path")
                     .transition()
                     .duration(200)
@@ -149,8 +152,11 @@ class RadarChart {
 
                 this.tooltips.selectAll("text")
                     .remove()
+                this.axisAnnotate.selectAll("text")
+                    .style('opacity', 1)
             });
-
+        
+        // points for stat (redundant encoding)
         this.points.selectAll("circle")
             .data(item.flat())
             .join("circle")

@@ -2,6 +2,7 @@
 <v-container id="container">
     <v-row>
         <v-col>
+            <!-- vuetify component for select -->
             <v-select
             item-text="text"
             itme-value="value"
@@ -13,6 +14,7 @@
         </v-col>
     </v-row>
 
+    <!-- bar chart -->
     <v-row>
         <svg id="bar"></svg>
     </v-row>
@@ -27,6 +29,7 @@ import * as d3 from "d3";
 export default {
     data: () => {
         return {
+            // orders for sort the bar chart
             selectedOrder: {
                     text : 'Descending',
                     value : 'desc'
@@ -46,30 +49,31 @@ export default {
                     value : 'type'
                 }
             ],
-            filteredItems : []
         }
     },
 
     props : ['items', 'locale'],
 
-    components:{
-    },
-
-    methods : {
-        
-    },
 
     mounted() {
+        // initialize chart
         this.barchart = new BarChart("#bar", 1800, 600)
         this.barchart.initialize()
+
+        // render chart by selected order
         this.barchart.update(this.items, this.selectedOrder.value)
+
+        // add eventlistener
         this.barchart.rects.on("click", e => {
-            console.log('rect', e.target)
+            // when line clicked, highlight the item
             this.selected = e.srcElement.__data__
             this.barchart.highlight(this.selected)
         })
         
+        // add eventlistener
         d3.select("#container").on("click",e => {
+            // when clicked element's tag is not rect or text
+            // off the highlight
             if (e.target.tagName !== "rect" & e.target.tagName !== "text") {
                 console.log('off')
                 this.barchart.off()
@@ -78,10 +82,12 @@ export default {
     },
 
     watch : {
+        // when items changed, barchart is updated
         items : function(){
             this.barchart.update(this.items, this.selectedOrder.value)
         },
-
+        
+        // when selectedOrder changed, barchart is updated
         selectedOrder : {
             handler(newVal, oldVal){
                 oldVal; // eslint
@@ -93,12 +99,3 @@ export default {
     }
 }
 </script>
-
-
-<style scoped>
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 2px;
-}
-</style>

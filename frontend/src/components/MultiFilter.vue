@@ -1,6 +1,9 @@
 <template>
-<!-- type, stat, 전포 환포 -->
     <div style="width:100%">
+        <!-- locale select
+            vuetify component for select
+            when selected locale changed (@change), items are fetched (at App.vue)
+        -->
         <v-row>
             <v-select
             item-text="text"
@@ -12,6 +15,10 @@
             @change="send()"
             ></v-select>
         </v-row>
+        <!-- search
+            vuetify component for text-input
+            filter items by keyword
+         -->
         <v-row>
             <v-text-field
             :label="locale =='en'? 'Search' : '검색하세요'"
@@ -23,6 +30,17 @@
             </v-text-field>
         </v-row>
         <v-row>
+            <!-- 
+                TypeFilter.vue
+                
+                :parameter
+                - locale: locale
+                - csshelper: css helper class for margin and padding.
+                - multiple: allow multiple type or not
+
+                :events & methods
+                - filter: when triggered, the selectedTypes are updated 
+            -->
             <TypeFilter
             :locale="locale"
             :csshelper="''"
@@ -32,42 +50,57 @@
         </v-row>
         <v-row>
             <v-col cols = "6" class="justify-center">
+                <!-- vuetify component for toggle -->
                 <v-switch
-                v-model="IsLegendary"
+                v-model="condition.IsLegendary"
                 :label="locale == 'en' ? 'Legendary': '전설'"
                 inset
                 @change="filter()"
                 ></v-switch>
             </v-col>
             <v-col cols = "6" class="justify-center">
+                <!-- vuetify component for toggle-->
                 <v-switch
-                v-model="IsMythical"
+                v-model="condition.IsMythical"
                 :label="locale == 'en' ? 'Mythical': '환상'"
                 inset
                 @change="filter()"
                 ></v-switch>
             </v-col>
         </v-row>
+        <!--
+            StatSlider 
+
+            :parameter
+            - stat: name of stat
+            - vertical: vertical slider or not
+            - max: max value of the slider
+
+            event & methods
+            - input: when the value changes, reflect the value to the corresponding variable
+
+        -->
+
         <v-row>
-            <StatSlider :stat="stats[locale]['hp']" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['hp']" :vertical="false" :max="200" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="stats[locale]['attack']" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['attack']" :vertical="false" :max="200" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="stats[locale]['defense']" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['defense']" :vertical="false" :max="200" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="stats[locale]['spattack']" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['spattack']" :vertical="false" :max="200" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="stats[locale]['spdefense']" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['spdefense']" :vertical="false" :max="200" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="stats[locale]['speed']" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['speed']" :vertical="false" :max="200" @input="setVal"/>
         </v-row>
         <v-row>
-            <StatSlider :stat="stats[locale]['total']" :vertical="false" @input="setVal"/>
+            <StatSlider :stat="stats[locale]['total']" :vertical="false" :max="700" @input="setVal"/>
         </v-row>
     </div>
 </template>
@@ -81,7 +114,7 @@ import TypeFilter from './TypeFilter.vue'
 export default {
     data() {
         return {
-            // for locales
+            // for locale change
             selectedLocale: {
                     text : 'English',
                     value : 'en'
@@ -98,22 +131,32 @@ export default {
             ],
             // for search
             keyword : "",
+
+            // for stat sliders. 
             stats : {
                 "en" : {"hp" : "HP", "attack" : "ATK", "defense" : "DEF", "spattack" : "SP.ATK", "spdefense" : "SP.DEF", "speed" : "SPD", "total" : "TOTAL"},
                 "ko" : {"hp" : "체력", "attack" : "공격", "defense" : "방어", "spattack" : "특수공격", "spdefense" : "특수방어", "speed" : "속도", "total" : "총합"}
             },
+            // for reverse indexing 
+            stats_reverse : {
+                "en" : {"HP" : "hp", "ATK" : "attack", "DEF" : "defense", "SP.ATK" : "spattack", "SP.DEF" : "spdefense", "SPD" : "speed", "TOTAL" : "total"},
+                "ko" : {"체력" : "hp", "공격" : "attack", "방어" : "defense", "특수공격" : "spattack", "특수방어" : "spdefense", "속도" : "speed", "총합" : "total"}
+            },
 
-            // for filter
-            selectedTypes : [],
-            IsLegendary : false,
-            IsMythical : false,
-            hp : 0,
-            attack : 0,
-            defense : 0,
-            spattack : 0,
-            spdefense : 0,
-            speed : 0,
-            total : 0,
+            // for filter 
+            condition : {
+                selectedTypes : [],
+                IsLegendary : true,
+                IsMythical : true,
+                hp : 0,
+                attack : 0,
+                defense : 0,
+                spattack : 0,
+                spdefense : 0,
+                speed : 0,
+                total : 0,
+            }
+
 
         }
     },
@@ -121,16 +164,20 @@ export default {
     props : ['locale'],
 
     methods : {
+
+        // add selected type from the TypeFilter
         addType : function(selectedTypes){
-            this.selectedTypes = selectedTypes
-            this.limiter()
+            // add
+            this.condition.selectedTypes = selectedTypes
+            // vaildate
+            this.typeValidator()
+            // filter
             this.filter()
         },
 
-        limiter : function() {
-
-            if (this.selectedTypes.length > 2) {
-                this.selectedTypes.pop()
+        typeValidator : function() {
+            if (this.condition.selectedTypes.length > 2) {
+                this.condition.selectedTypes.pop()
                 if (this.locale == 'en'){
                     alert('The pokemon can have multiple types up to 2.')
                 } else {
@@ -138,53 +185,44 @@ export default {
                 }
             } 
         },
-
+        
+        // set condition for stat
         setVal : function(newVal){
-            // hard coding >> soft
-            let stat = newVal.stat
-            if (stat === "HP"){
-                this.hp = newVal.value
-            } else if (stat === "ATK"){
-                this.attack = newVal.value
-            } else if (stat === "DEF"){
-                this.attack = newVal.value
-            } else if (stat === "SP.ATK"){
-                this.spattack = newVal.value
-            } else if (stat === "SP.DEF"){
-                this.spattack = newVal.value
-            } else if (stat === "SPD"){
-                this.speed = newVal.value
-            } else {
-                this.total = newVal.value
-            }
+            this.condition[this.stats_reverse[this.locale][newVal.stat]] = newVal.value
+            // and filter
             this.filter()
         },
-
+        
+        // triggers the method (setLocale) bind at @localeChange 
         send : function() {
-            console.log('filter',  this.selectedLocale.value)
             this.$emit('localeChange', this.selectedLocale.value)
         },
 
+        // triggers the method (filterItems) bind at @condition
         filter : function(){
-            this.limiter()
+            this.typeValidator()
             this.$emit('condition',
                 {
                     condition :  this.condition,
                     keyword : this.keyword
                 })
         },
-
+        
+        // initialize condition
         initialize : function(){
-            this.selectedTypes = []
-            this.IsLegendary = false
-            this.IsMythical = false
-            this.hp = 0
-            this.attack = 0
-            this.defense = 0
-            this.spattack = 0
-            this.spdefense =0
-            this.speed = 0
-            this.total = 0
+            this.condition =  {
+                selectedTypes : [],
+                IsLegendary : true,
+                IsMythical : true,
+                hp : 0,
+                attack : 0,
+                defense : 0,
+                spattack : 0,
+                spdefense : 0,
+                speed : 0,
+                total : 0,
+
+            }
         }
     },
 
@@ -194,31 +232,11 @@ export default {
     },
 
     watch : {
+        // when locale changed, initialize condition
         locale : function(){
             this.initialize()
         }
     },
-
-
-    computed : {
-        condition : function(){
-            return {
-                hp : this.hp,
-                attack : this.attack,
-                defense : this.defense,
-                spattack : this.spattack,
-                spdefense : this.spdefense,
-                speed : this.speed,
-                total : this.total,
-                IsLegendary : this.IsLegendary,
-                IsMythical : this.IsMythical,
-                selectedTypes : this.selectedTypes
-                }
-        }
-    }
-
-
-
 
 }
 </script>

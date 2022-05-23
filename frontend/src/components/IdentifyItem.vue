@@ -1,13 +1,17 @@
 <template>
     <div style="width:100%">
+        <!-- wrapper -->
         <v-card
         height="900"
         class="overflow-y-auto overflow-x-hidden">
             <!-- sprite & stats -->
-            <v-row>
+            <v-row align="center">
+                <!-- sprites -->
                 <v-col cols = "5">
-                    <v-img :src="imgSrc" max-width="400"  /> 
+                    <!-- vuetify component for image -->
+                    <v-img :src="imgSrc" max-width="400"  position="center"  /> 
                 </v-col>
+                <!-- radar chart -->
                 <v-col cols = "7">
                     <svg id="radar"></svg>
                 </v-col>
@@ -37,6 +41,17 @@
             
             <!-- Available moves -->
             <v-card-title>{{ locale == "en" ? "Moves" : "기술"}}</v-card-title>
+                <!-- 
+                    TypeFilter.vue
+                    
+                    :parameter
+                    - locale: locale
+                    - csshelper: css helper class for margin and padding.
+                    - multiple: allow multiple type or not
+
+                    :events & methods
+                    - filter: when triggered, the moves are filtered by types 
+                 -->
                 <TypeFilter
                 :locale="locale"
                 :csshelper="'mb-4 ml-4 mr-4'"
@@ -45,15 +60,16 @@
                 />
             <v-row>
                 <v-col>
+                    <!-- vuetify component for table -->
                     <v-data-table
                         :headers="headers[locale]"
                         :items="filteredMoves"
-                        multi-sort
                         class="elevation-1"
                     >
-                    <template v-slot:[`item.type`]="{ item }">
-                        <v-btn :color="item.type.color" small> {{item.type.name}}</v-btn>
-                    </template>
+                        <!-- custom row design-->
+                        <template v-slot:[`item.type`]="{ item }">
+                            <v-chip :color="item.type.color" small> {{item.type.name}}</v-chip>
+                        </template>
                     </v-data-table>
                 </v-col>
             </v-row>
@@ -68,18 +84,17 @@
 import RadarChart from '../d3Chart/radar.js'
 import TypeFilter from "./TypeFilter.vue"
 
-//import axios from 'axios'
-
 let spriteUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/'
 
 export default {
-    // template variables 
     data() {
         return {
+            // the name and index of radar chart's each axis 
             features : {
                 "en" : [['HP', 0], ['ATTACK', 1],[ 'DEFENSE', 2], ['SP.ATTACK', 3], ['SP.DEFENSE', 4], ['SPEED', 5]],
                 "ko" : [['체력', 0], ['공격', 1], ['방어', 2], ['특수공격', 3], ['특수방어', 4], ['스피드', 5]]  
             },
+            // headers for table
             headers : {
                 "en" : [
                     {text : 'Name', value : 'name'},
@@ -94,6 +109,8 @@ export default {
                     {text : '타입', value : 'type'}
                 ]
             },
+
+            // variables
             moves : [],
             selectedTypes : [],
             types : [],
@@ -107,10 +124,9 @@ export default {
     },
 
 
-    // template variables from upper parent component
+    // variables from parent component 
     props : ['item', 'locale'],
     
-    // js function 
     methods : {
         filter : function(selectedTypes){
             // filter moves by selected types
@@ -126,23 +142,23 @@ export default {
     },
         
     mounted() {
-        // run right after the page mounted 
+        // generate chart
         this.radarchart = new RadarChart("#radar", this.features[this.locale], 200, 250)
         this.radarchart.initialize()
         this.radarchart.update(this.item)
     },
 
     watch : {
-        // works as the eventlistener
+        // when item changed, the radar chart is updated
         item : function(){
             this.radarchart.update(this.item.data)
             this.moves = this.item.moves.map( (d) => (d.move) )
             this.filteredMoves = this.moves
         }
     },
-
+    
+    // dynamic variable
     computed : {
-        // dynamic variable
         imgSrc : function() {
             return `${spriteUrl}${this.item.data.pokedex_index}.png`
         },

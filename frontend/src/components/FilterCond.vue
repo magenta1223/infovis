@@ -1,32 +1,38 @@
 <template>
     <div style="width:100%">
-        <!--item이 15개 이상이면 위에 경고메세지 같은거 -->
-        <v-row>
+        <!-- Parallel Coordinates  -->
+        <v-row id="container">
             <v-col>
-                <svg id="polycoords"></svg>
+                <svg id="parallelCoords"></svg>
             </v-col>
         </v-row>
-        <v-row>
 
+        <!-- table for items filtered from App.vue -->
+        <v-row>
             <v-col>
+                <!-- vuetify component for table -->
                 <v-data-table
                     :headers="headers[locale]"
                     :items="items"
                     class="elevation-1"
                 >
-                <template v-slot:item="{ item }">
-                    <tr @click="click(item)">
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.hp }}</td>
-                        <td>{{ item.attack }}</td>
-                        <td>{{ item.defense }}</td>
-                        <td>{{ item.spattack }}</td>
-                        <td>{{ item.spdefense }}</td>
-                        <td>{{ item.speed }}</td>
-                        <td>{{ item.total }}</td>
-                        <td> <v-chip v-for="type in item.types" :key="type.id" :color="type.color" small class="ma-1">{{type.name}}</v-chip> </td>
-                    </tr>
-                </template>
+                    <!-- custom row design -->
+                    <template v-slot:item="{ item }">
+                        <!-- when clicked row, the item corresponding with the row in the chart is highlighted -->
+                        <tr @click="click(item)">
+                            <!-- fields -->
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.hp }}</td>
+                            <td>{{ item.attack }}</td>
+                            <td>{{ item.defense }}</td>
+                            <td>{{ item.spattack }}</td>
+                            <td>{{ item.spdefense }}</td>
+                            <td>{{ item.speed }}</td>
+                            <td>{{ item.total }}</td>
+                            <!-- types -->
+                            <td> <v-chip v-for="type in item.types" :key="type.id" :color="type.color" small class="ma-1">{{type.name}}</v-chip> </td>
+                        </tr>
+                    </template>
                 </v-data-table>
             </v-col>
         </v-row>
@@ -35,18 +41,19 @@
 
 
 <script>
-import MultiCoordinates from "../d3Chart/multicoordinates.js"
-
-
-//let spriteUrl = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/'
+import ParallelCoordinates from "../d3Chart/parallelcoordinates.js"
+import * as d3 from "d3";
 
 export default {
     data() {
         return {
+            // the name and index of parallel coordinates chart's each axis 
             features : {
                 "en" : [['HP', 0], ['ATTACK', 1],[ 'DEFENSE', 2], ['SP.ATTACK', 3], ['SP.DEFENSE', 4], ['SPEED', 5]],
                 "ko" : [['체력', 0], ['공격', 1], ['방어', 2], ['특수공격', 3], ['특수방어', 4], ['스피드', 5]]  
             },
+
+            // headers for table
             headers : {
                 "en" : [
                     {text : 'Name', value : 'name'},
@@ -72,40 +79,59 @@ export default {
                     {text : '타입', value : 'type'}
                 ]
             },
-            selected : "",
-            initialUpdate : true
+            
+            // for highlighting
+            selected : ""
 
         }
     },
-
+    
+    // variables from parent component (App.vue)
     props : ['items', 'locale'],
 
     methods : {
-      click : function(item){
+        // when the row clicked, highlight the item
+        click : function(item){
             this.selected = item
-            this.multicoords.highlight(this.selected)
+            this.parallelCoordinates.highlight(this.selected)
+            // triggers the method (retrieve) bind at @retrieve
             this.$emit("retrieve", item.id)
-
       }  
     },
 
     mounted() {
-
         console.log('filter mount', this.items)
-        this.multicoords = new MultiCoordinates("#polycoords", this.features[this.locale], 800, 280)
-        this.multicoords.initialize()
-        this.multicoords.update(this.items)
-        this.multicoords.lines.on("click", (e) => {
+        // generate chart. width / height is for 1920-1080.
+        this.parallelCoordinates = new ParallelCoordinates("#parallelCoords", this.features[this.locale], 800, 280)
+        this.parallelCoordinates.initialize()
+        this.parallelCoordinates.update(this.items)
+
+        // add eventlistener
+        this.parallelCoordinates.lines.on("click", (e) => {
+            // when line clicked, highlight the item
             this.selected = e.srcElement.__data__
-            this.multicoords.highlight(this.selected)
+            this.parallelCoordinates.highlight(this.selected)
+            // triggers the method (retrieve) bind at @retrieve
             this.$emit("retrieve", this.selected.id)
         })
+        // add eventlistener
+        d3.select("#container").on("click",e => {
+            // when clicked element's tag is not path
+            // off the highlight
+            if (e.target.tagName !== "path") {
+                console.log('off')
+                this.parallelCoordinates.off()
+            }
+        });
+
     },
+    
 
     watch : {
+        // when items changed, update chart
         items : function(){
             console.log(this.selected)
-            this.multicoords.update(this.items)      
+            this.parallelCoordinates.update(this.items)      
         }
     },
 

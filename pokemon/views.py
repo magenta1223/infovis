@@ -75,12 +75,6 @@ class CounterView(generics.GenericAPIView):
             Q(locale__language__iexact = kwargs['locale']) &
             Q(pokedex_index = kwargs['pokedex_index'])
         )[0]).data
-# queryset = Pokemon.objects.all()
-
-# actor = PokemonSerializer(queryset.filter(
-#     Q(locale__language__iexact = kwargs['locale']) &
-#     Q(pokedex_index = kwargs['pokedex_index'])
-# )[0]).data
 
         targets = self.get_serializer(
             data = self.queryset.filter(
@@ -89,14 +83,6 @@ class CounterView(generics.GenericAPIView):
             ),
             many = True
             )
-
-# targets = PokemonSerializer(
-#     data = queryset.filter(
-#         Q(locale__language__iexact = kwargs['locale']) &
-#         Q(isBaby = False)
-#     ),
-#     many = True
-#     )
 
         targets.is_valid()
         

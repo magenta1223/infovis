@@ -1,12 +1,8 @@
 import * as d3 from "d3";
 
-// transition by sort
+// dynamic sort
 // https://medium.com/analytics-vidhya/building-racing-bar-chart-in-d3js-d89b71cd3439
 class BarChart {
-    // value별 정렬기능
-    // 진입 transition
-    // 나가는 transition
-
     margin = {
         top: 50, right: 50, bottom: 50, left: 50
     }
@@ -73,23 +69,22 @@ class BarChart {
             .padding(0.3);
 
         this.xAxis
-            .attr("transform", `translate(0, 0)`)
             .call(d3.axisTop(this.xScale))
             .transition()
             
         this.yAxis
             .call(
                 d3.axisLeft(this.yScale)
-                    .tickFormat((d) => {d; ''})
-                    .tickSize(0))
+                    .tickFormat((d) => {d; ''}) 
+                    .tickSize(0)) // y axis = items. name will be shown as tooltip
             .transition()
 
         this.rects.selectAll("rect")
             .data(data)
             .join("rect")
             .transition()
-            // move data's x position to sorted data's x position (now criterion is sorted data)
             .attr("x", 0)
+            // move data's y position to sorted data's y position (now criterion is sorted data)
             .attr("y", d => this.yScale(this.sorted[this.sorted.findIndex(e => e.name === d.name)].name))
             .attr("height", this.yScale.bandwidth())
             .attr("width", d => this.xScale(d.counterCoef))
@@ -99,7 +94,7 @@ class BarChart {
 
     highlight(highlight){
         console.log('highlight')
-        // set opacities of others to 0.1 
+
         this.rects.selectAll("rect")
             .transition()
             .style("fill-opacity", 0.1)

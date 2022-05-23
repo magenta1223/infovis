@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-class MultiCoordinates {
+class ParallelCoordinates {
     margin = {
         top: 50, right: 50, bottom: 10, left: 50
     }
@@ -25,9 +25,9 @@ class MultiCoordinates {
 
         this.container = this.svg.append("g");
         this.axes = this.container.append("g");
-        this.titles = this.container.append("g");
+        this.axisName = this.container.append("g");
         this.lines = this.container.append("g");
-        this.focusedLines = this.container.append("g");
+        this.focused = this.container.append("g");
 
         this.svg
             .attr("width", this.width + this.margin.left + this.margin.right)
@@ -36,7 +36,7 @@ class MultiCoordinates {
 
         this.container.attr("transform", `translate(${this.margin.left}, ${this.margin.top})`);
 
-        this.polyline = (d) => {
+        this.line = (d) => {
             return d3.line()(this.features.map(
                 // stat : [statName, statIndex]
                 stat => [this.xScale(stat[0]), this.yScale(this.parseStat(d)[stat[1]].value)]
@@ -77,7 +77,7 @@ class MultiCoordinates {
                 i === 0 ? d3.select(nodes[i]).call(d3.axisLeft(this.yScale)) : d3.select(nodes[i]).call(d3.axisLeft(this.yScale).ticks(0))
             })
 
-        this.titles.selectAll("text")
+        this.axisName.selectAll("text")
             .data(this.features)
             .join("text")
             .attr("transform", d => `translate(${this.xScale(d[0])}, 0)`)
@@ -90,7 +90,7 @@ class MultiCoordinates {
             .selectAll("path")
             .data(data)
             .join("path")
-            .attr("d", this.polyline)
+            .attr("d", this.line)
             .style("fill", "none")
             .style("stroke", (d, i) => (colors[i]))
             .attr("stroke-width", 15)
@@ -105,20 +105,33 @@ class MultiCoordinates {
 
         // set opacities of others to 0.1 
         this.lines.selectAll("path")
-            .transition(30)
+            .transition()
             .style("opacity", 0.1)
 
         // set highlight's opacity to 1 and width 15
-        this.focusedLines
+        this.focused
             .selectAll("path")
             .data([highlight])
             .join("path")
-            .attr("d", this.polyline)
+            .attr("d", this.line)
             .style("fill", "none")
             .style("stroke", color)
             .style("opacity", 1)
             .attr("stroke-width", 15)
     }
+
+    off(){
+        // back to before highlight
+        this.lines.selectAll("path")
+            .transition()
+            .style("opacity", 0.5)
+        this.focused
+            .selectAll("path")
+            .remove()
+
+
+    }
+
 }
 
-export default MultiCoordinates
+export default ParallelCoordinates

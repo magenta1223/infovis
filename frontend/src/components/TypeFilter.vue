@@ -1,4 +1,5 @@
 <template>
+    <!-- vuetify component for select -->
     <v-select
     v-model="selectedTypes"
     :class="csshelper"
@@ -27,6 +28,7 @@ import axios from 'axios'
 export default {
     data() {
         return {
+            // for selection
             selectedTypes : [],
             types : [],
         }  
@@ -35,8 +37,8 @@ export default {
     props : ['locale', 'multiple', 'csshelper'],
 
     methods : {
+        // get types from the server by locale
         fetchTypes : function() {
-            // get types by locale from the backend
             axios({
                 method : "GET",
                 url : localStorage.getItem('url') + 'poketype/',
@@ -49,7 +51,7 @@ export default {
                 console.log('Failed', response)
             })
         },
-
+        // when selected type changes, triggers the method of parent component bind at @filter
         send : function(){
             this.$emit('filter', this.selectedTypes)
         }
@@ -57,10 +59,12 @@ export default {
     },
 
     mounted() {
+        // when loaded, get types from the server
         this.fetchTypes()
     },
 
     watch : {
+        // when locale changed, get types from the server
         locale : function(){
             this.fetchTypes()
         } 
