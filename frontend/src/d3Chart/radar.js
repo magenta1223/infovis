@@ -148,10 +148,14 @@ class RadarChart {
                     
                 for (let i in this.tooltips){
 
+                    console.log('tooltip', d, this.tooltips[i].node())
+
                     this.tooltips[i]
                         .selectAll(".tooltip")
                         .html(d[i].value)
                         .style("visibility", "visible")
+                    
+                    console.log(this.tooltips[i])
 
                     createPopper(this.center.select("circle")._groups[0][0], this.tooltips[i].node(), {
                         placement : "bottom",

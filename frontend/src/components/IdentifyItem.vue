@@ -74,7 +74,7 @@
                 </v-col>
             </v-row>
         </v-card>
-        <div v-for="f in features[locale]" :key="f[0]" :id="'t'+ f[1]">
+        <div v-for="f in features" :key="f[0]" :id="'t'+ f[1]">
             <div class = "tooltip">
                 dddd
             </div>
@@ -102,10 +102,7 @@ export default {
     data() {
         return {
             // the name and index of radar chart's each axis 
-            features : {
-                "en" : [['HP', 0], ['ATTACK', 1],[ 'DEFENSE', 2], ['SP.ATTACK', 3], ['SP.DEFENSE', 4], ['SPEED', 5]],
-                "ko" : [['체력', 0], ['공격', 1], ['방어', 2], ['특수공격', 3], ['특수방어', 4], ['스피드', 5]]  
-            },
+            features : [['HP', 0], ['ATTACK', 1],[ 'DEFENSE', 2], ['SP.ATTACK', 3], ['SP.DEFENSE', 4], ['SPEED', 5]],
             // headers for table
             headers : {
                 "en" : [
@@ -165,7 +162,7 @@ export default {
         
     mounted() {
         // generate chart
-        this.radarchart = new RadarChart("#radar", this.features[this.locale], 200, 250)
+        this.radarchart = new RadarChart("#radar", this.features, 200, 250)
         this.radarchart.initialize()
         this.radarchart.update(this.defaultItem)
     },
@@ -173,6 +170,12 @@ export default {
     watch : {
         // when item changed, the radar chart is updated
         item : function(){
+            this.radarchart.update(this.item.data)
+            this.moves = this.item.moves.map( (d) => (d.move) )
+            this.filteredMoves = this.moves
+        },
+
+        locale : function(){
             this.radarchart.update(this.item.data)
             this.moves = this.item.moves.map( (d) => (d.move) )
             this.filteredMoves = this.moves
