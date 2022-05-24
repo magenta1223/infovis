@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { createPopper } from '@popperjs/core';
 
 // dynamic sort
 // https://medium.com/analytics-vidhya/building-racing-bar-chart-in-d3js-d89b71cd3439
@@ -21,7 +22,8 @@ class BarChart {
         this.legend = this.container.append("g");
         this.rects = this.container.append("g")
         this.focused = this.container.append("g")
-        this.tootip = this.container.append("g")
+
+        this.tooltip = d3.select("#tooltipR")
 
         this.sorted = []
 
@@ -111,16 +113,23 @@ class BarChart {
             .attr("fill", d => d.types[0].color)
             .style("opacity", 1)
 
-        this.tootip
-            .selectAll("text")
-            .data([highlight])
-            .join("text")
-            .style("font-size", "13px")
-            .attr("x", d => this.xScale(d.counterCoef) + 5)
-            .attr("y", d => this.yScale(this.sorted[this.sorted.findIndex(e => e.name === d.name)].name))
-            .attr("text-anchor", "start")
-            .attr("alignment-baseline", "hanging")
-            .text(d => `${d.name} ${Math.round(d.counterCoef * 100) / 100}`)
+        this.tooltip
+            .selectAll(".tooltip")
+            .html(`${highlight.name} ${Math.round(highlight.counterCoef * 100) / 100}`)
+            .style("visibility", "visible")
+            .transition()
+        
+        createPopper(this.focused._groups[0][0], this.tooltip.node(), {
+            placement : "right",
+            modifiers : [
+                {
+                    name : "offset",
+                    options : {
+                        offset : [0, 10]
+                    }
+                }
+            ]
+        });
     }
 
     off(){
@@ -130,9 +139,9 @@ class BarChart {
         this.focused
             .selectAll("rect")
             .remove()
-        this.tootip
-            .selectAll("text")
-            .remove()
+
+        this.tooltip.selectAll(".tooltip")
+            .style("visibility", "hidden")
 
     }
 

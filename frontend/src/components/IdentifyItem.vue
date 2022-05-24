@@ -74,7 +74,19 @@
                 </v-col>
             </v-row>
         </v-card>
+        <div v-for="f in features[locale]" :key="f[0]" :id="'t'+ f[1]">
+            <div class = "tooltip">
+                dddd
+            </div>
+        </div>
+        <div id="t7">
+            <div class = "tooltip">
+                dddd
+            </div>
+        </div>
     </div>
+
+
 
 
 </template>
@@ -115,12 +127,22 @@ export default {
             selectedTypes : [],
             types : [],
             filtered : [],
-            filteredMoves : []
+            filteredMoves : [],
+
+            defaultItem : {
+                hp : 0,
+                attack : 0,
+                defense : 0,
+                spattack : 0,
+                spdefense : 0,
+                speed : 0,
+                types : [{color : "#000000"}]
+            }
         }
     },
 
     components : {
-        TypeFilter
+        TypeFilter,
     },
 
 
@@ -145,7 +167,7 @@ export default {
         // generate chart
         this.radarchart = new RadarChart("#radar", this.features[this.locale], 200, 250)
         this.radarchart.initialize()
-        this.radarchart.update(this.item)
+        this.radarchart.update(this.defaultItem)
     },
 
     watch : {
@@ -166,3 +188,16 @@ export default {
 }
 </script>
 
+<style scoped>
+    .tooltip {
+        width : auto;
+        visibility: hidden;
+        background: #333;
+        color: white;
+        font-weight: bold;
+        padding: 4px 8px;
+        font-size: 13px;
+        border-radius: 4px;
+    }
+
+</style>

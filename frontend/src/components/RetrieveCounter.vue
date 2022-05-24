@@ -1,5 +1,5 @@
 <template>
-<v-container id="container">
+<v-container id="Rcontainer">
     <v-row>
         <v-col>
             <!-- vuetify component for select -->
@@ -18,6 +18,14 @@
     <v-row>
         <svg id="bar"></svg>
     </v-row>
+
+    <div id="tooltipR">
+        <div class = "tooltip">
+            dddd
+        </div>
+    </div>
+
+    
 </v-container>
 </template>
 
@@ -71,7 +79,7 @@ export default {
         })
         
         // add eventlistener
-        d3.select("#container").on("click",e => {
+        d3.select("#Rcontainer").on("click",e => {
             // when clicked element's tag is not rect or text
             // off the highlight
             if (e.target.tagName !== "rect" & e.target.tagName !== "text") {
@@ -99,3 +107,17 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+    .tooltip {
+        width : auto;
+        visibility: hidden;
+        background: #333;
+        color: white;
+        font-weight: bold;
+        padding: 4px 8px;
+        font-size: 13px;
+        border-radius: 4px;
+    }
+
+</style>

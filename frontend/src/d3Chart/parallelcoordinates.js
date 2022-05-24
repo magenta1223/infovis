@@ -2,7 +2,7 @@ import * as d3 from "d3";
 
 class ParallelCoordinates {
     margin = {
-        top: 50, right: 50, bottom: 10, left: 50
+        top: 50, right: 50, bottom: 50, left: 50
     }
 
     constructor(svg, features, width, height){
@@ -22,6 +22,11 @@ class ParallelCoordinates {
         this.yScale = d3.scaleLinear()
             .domain([0, 200])
             .range([this.height, 0])
+            .clamp(true) // clipping when over the domain range
+
+
+
+
 
         this.container = this.svg.append("g");
         this.axes = this.container.append("g");
@@ -43,6 +48,26 @@ class ParallelCoordinates {
                 )
             );
         }
+
+        this.axisName.selectAll("text")
+            .data(this.features)
+            .join("text")
+            .attr("transform", d => `translate(${this.xScale(d[0])}, ${this.height + this.margin.bottom})`)
+            .text(d => d[0])
+            .attr("text-anchor", "middle")
+            .attr("font-size", ".9rem")
+            .attr("dy", "-.8rem")
+
+        this.axes.selectAll("g.axis")
+            .data(this.features)
+            .join("g")
+            .attr("class", "axis")
+            .attr("transform", d => `translate(${this.xScale(d[0])}, 0)`)
+            .each((d, i, nodes) => {
+                // all axis share same scales, so only 1st axis needs ticks
+                i === 0 ? d3.select(nodes[i]).call(d3.axisLeft(this.yScale)) : d3.select(nodes[i]).call(d3.axisLeft(this.yScale).ticks(0))
+            })
+
 
     }
 
@@ -67,24 +92,9 @@ class ParallelCoordinates {
 
         let colors = data.map(d => d.types[0].color)
 
-        this.axes.selectAll("g.axis")
-            .data(this.features)
-            .join("g")
-            .attr("class", "axis")
-            .attr("transform", d => `translate(${this.xScale(d[0])}, 0)`)
-            .each((d, i, nodes) => {
-                // all axis share same scales, so only 1st axis needs ticks
-                i === 0 ? d3.select(nodes[i]).call(d3.axisLeft(this.yScale)) : d3.select(nodes[i]).call(d3.axisLeft(this.yScale).ticks(0))
-            })
 
-        this.axisName.selectAll("text")
-            .data(this.features)
-            .join("text")
-            .attr("transform", d => `translate(${this.xScale(d[0])}, 0)`)
-            .text(d => d[0])
-            .attr("text-anchor", "middle")
-            .attr("font-size", ".9rem")
-            .attr("dy", "-.8rem")
+
+
 
         this.lines
             .selectAll("path")
@@ -95,6 +105,7 @@ class ParallelCoordinates {
             .style("stroke", (d, i) => (colors[i]))
             .attr("stroke-width", 15)
             .style("opacity", 0.5)
+
 
                 
     }

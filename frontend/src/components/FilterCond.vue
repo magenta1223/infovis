@@ -119,7 +119,7 @@ export default {
             // when clicked element's tag is not path
             // off the highlight
             if (e.target.tagName !== "path") {
-                console.log('off')
+                console.log('filter off')
                 this.parallelCoordinates.off()
             }
         });
