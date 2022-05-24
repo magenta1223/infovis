@@ -91,7 +91,7 @@
                     - 
                 -->
 
-                <RetrieveCounter
+                <DeriveCounter
                 :locale="locale"
                 :items="counters"/>
 
@@ -107,7 +107,7 @@
 import MultiFilter from './components/MultiFilter.vue'
 import IdentifyItem from './components/IdentifyItem.vue'
 import FilterCond from './components/FilterCond.vue'
-import RetrieveCounter from './components/RetrieveCounter.vue'
+import DeriveCounter from './components/DeriveCounter.vue'
 // for asynchronous communication
 import axios from "axios";
 
@@ -134,7 +134,7 @@ export default {
     components : {
         MultiFilter,
         FilterCond,
-        RetrieveCounter,
+        DeriveCounter,
         IdentifyItem
     },
     

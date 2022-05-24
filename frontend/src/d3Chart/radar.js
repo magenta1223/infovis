@@ -134,7 +134,7 @@ class RadarChart {
             .data(item)
             .join("path")
         
-            paths
+        paths
             .on('mouseover', (e, d) => {
                 // text tooltip
 

@@ -19,7 +19,6 @@ class BarChart {
         this.container = this.svg.append("g")
         this.xAxis = this.container.append("g");
         this.yAxis = this.container.append("g");
-        this.legend = this.container.append("g");
         this.rects = this.container.append("g")
         this.focused = this.container.append("g")
 

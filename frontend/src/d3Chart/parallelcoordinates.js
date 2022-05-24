@@ -25,9 +25,6 @@ class ParallelCoordinates {
             .clamp(true) // clipping when over the domain range
 
 
-
-
-
         this.container = this.svg.append("g");
         this.axes = this.container.append("g");
         this.axisName = this.container.append("g");
@@ -84,18 +81,8 @@ class ParallelCoordinates {
 
     update(data) {
 
-        if (typeof(data) === undefined){
-            data = {
-                hp : 0, attack : 0, defense : 0, spattack : 0, spdefense : 0, speed :0, types : [{color : "#000000"}]
-            }
-        }
-
         let colors = data.map(d => d.types[0].color)
-
-
-
-
-
+        
         this.lines
             .selectAll("path")
             .data(data)

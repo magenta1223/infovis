@@ -201,6 +201,7 @@ export default {
         // triggers the method (filterItems) bind at @condition
         filter : function(){
             this.typeValidator()
+            // emit triggers the event (@condition) in the parent component, the name of which is same with the first paramter (condition)
             this.$emit('condition',
                 {
                     condition :  this.condition,
