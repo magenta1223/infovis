@@ -82,7 +82,7 @@ export default {
         d3.select("#Rcontainer").on("click",e => {
             // when clicked element's tag is not rect or text
             // off the highlight
-            if (e.target.tagName !== "rect" & e.target.tagName !== "text") {
+            if (e.target.tagName !== "rect" & e.target.className !== "tooltip") {
                 console.log('off')
                 this.barchart.off()
             }
